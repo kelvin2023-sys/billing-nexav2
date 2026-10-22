@@ -1,0 +1,473 @@
+<!-- views/admin/partials/sidebar.ejs -->
+<script>
+(function() {
+  const savedTheme = localStorage.getItem('app-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (savedTheme === 'light') {
+    document.documentElement.classList.add('light-theme');
+  } else {
+    document.documentElement.classList.remove('light-theme');
+  }
+})();
+
+function toggleAppTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  if (newTheme === 'light') {
+    document.documentElement.classList.add('light-theme');
+    if (document.body) document.body.classList.add('light-theme');
+  } else {
+    document.documentElement.classList.remove('light-theme');
+    if (document.body) document.body.classList.remove('light-theme');
+  }
+  localStorage.setItem('app-theme', newTheme);
+  updateThemeToggleIcons(newTheme);
+}
+
+function updateThemeToggleIcons(theme) {
+  const isLight = theme === 'light';
+  document.querySelectorAll('.theme-toggle-icon').forEach(icon => {
+    icon.className = isLight ? 'bi bi-sun-fill theme-toggle-icon' : 'bi bi-moon-stars-fill theme-toggle-icon';
+    icon.style.color = isLight ? '#f59e0b' : '#fbbf24';
+  });
+  document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+    btn.setAttribute('title', isLight ? 'Ganti ke Mode Gelap (Dark)' : 'Ganti ke Mode Terang (Light)');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const theme = localStorage.getItem('app-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  if (theme === 'light') {
+    document.documentElement.classList.add('light-theme');
+    if (document.body) document.body.classList.add('light-theme');
+  }
+  updateThemeToggleIcons(theme);
+});
+</script>
+
+<style>
+/* ── COLLAPSIBLE ACCORDION SIDEBAR STYLES ── */
+.sb-group {
+  margin: 2px 6px;
+}
+
+.sb-group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted, #94a3b8);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.sb-group-header:hover {
+  color: var(--text, #ffffff);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.sb-group-header.open,
+.sb-group-header.active-group {
+  color: var(--text, #ffffff);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sb-group-header.active-group {
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.sb-group-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-group-icon {
+  font-size: 14px;
+  color: var(--primary, #6366f1);
+  width: 18px;
+  text-align: center;
+}
+
+.sb-group-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sb-group-count {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted, #94a3b8);
+  font-weight: 600;
+}
+
+.sb-chevron {
+  font-size: 10px;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--muted, #94a3b8);
+}
+
+.sb-group-header.open .sb-chevron {
+  transform: rotate(180deg);
+  color: var(--primary, #818cf8);
+}
+
+.sb-group-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  padding-left: 6px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.12);
+  margin-left: 18px;
+  margin-top: 2px;
+}
+
+.sb-group-body.show {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.sb-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6.5px 10px;
+  margin: 1.5px 0;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: var(--muted, #94a3b8);
+  text-decoration: none;
+  border-left: none !important;
+  transition: all 0.15s ease;
+}
+
+.sb-sub-item:hover {
+  color: var(--text, #ffffff);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sb-sub-item.active {
+  background: var(--pdim, rgba(99, 102, 241, 0.15)) !important;
+  color: var(--primary, #818cf8) !important;
+  font-weight: 600;
+}
+
+.sb-sub-item i {
+  font-size: 13.5px;
+  width: 17px;
+  text-align: center;
+}
+
+/* Light Theme Adjustments */
+html[data-theme="light"] .sb-group-header:hover {
+  background: #f1f5f9;
+}
+html[data-theme="light"] .sb-group-header.open {
+  background: #f8fafc;
+}
+html[data-theme="light"] .sb-group-body {
+  border-left-color: rgba(0, 0, 0, 0.12);
+}
+html[data-theme="light"] .sb-group-count {
+  background: #e2e8f0;
+  color: #475569;
+}
+html[data-theme="light"] .sb-sub-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+html[data-theme="light"] .sb-sub-item.active {
+  background: rgba(79, 70, 229, 0.12) !important;
+  color: #4f46e5 !important;
+}
+</style>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-icon"><i class="bi bi-wifi"></i></div>
+    <div style="flex:1">
+      <div class="sb-name">
+        <%= company %>
+      </div>
+      <div class="sb-sub"><%= t('admin.panel', 'Admin Panel') %></div>
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+        <a href="/lang/id" class="btn btn-g btn-sm" style="padding:4px 8px">ID</a>
+        <a href="/lang/en" class="btn btn-g btn-sm" style="padding:4px 8px">EN</a>
+        <button type="button" class="btn btn-g btn-sm theme-toggle-btn" onclick="toggleAppTheme()" title="Ganti Tema Dark / Light" style="padding:4px 8px;margin-left:auto">
+          <i class="bi bi-moon-stars-fill theme-toggle-icon" style="color:#fbbf24"></i> Tema
+        </button>
+      </div>
+      <% if (typeof multiRouterMode !== 'undefined' && multiRouterMode && allActiveRouters && allActiveRouters.length > 0) { %>
+        <div style="margin-top:10px;padding:8px;background:rgba(255,255,255,0.06);border-radius:10px;border:1px solid rgba(255,255,255,0.1)">
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:600;display:flex;align-items:center;gap:4px">
+            <i class="bi bi-router"></i> Router Filter
+          </div>
+          <select class="form-select form-select-sm" style="font-size:12px;cursor:pointer" onchange="window.location.href='/admin/set-active-router?router_id=' + this.value">
+            <option value="all" <%= (!selectedRouterId) ? 'selected' : '' %>>🌐 Semua Router (<%= allActiveRouters.length %>)</option>
+            <% allActiveRouters.forEach(r => { %>
+              <option value="<%= r.id %>" <%= (selectedRouterId === r.id) ? 'selected' : '' %>>
+                🔌 <%= r.name %> (<%= r.host %>)
+              </option>
+            <% }) %>
+          </select>
+        </div>
+      <% } %>
+    </div>
+    <button class="sb-close btn-g btn-sm" onclick="toggleSidebar()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <nav class="sb-nav">
+    <!-- Standalone Dashboard Direct Link -->
+    <% 
+      const dashItem = (typeof dashboardItem !== 'undefined' && dashboardItem) 
+        ? dashboardItem 
+        : { hrefResolved: '/admin', icon: 'bi bi-speedometer2', labelDefault: 'Dashboard', activePages: ['dashboard'] }; 
+      const isDashActive = (dashItem.activePages || []).includes(activePage);
+    %>
+    <a
+      href="<%= dashItem.hrefResolved %>"
+      class="sb-item <%= isDashActive ? 'active' : '' %>"
+      style="margin: 4px 6px 10px; border-radius: 8px; font-weight: 600;"
+    >
+      <i class="<%= dashItem.icon %>"></i>
+      <span><%= dashItem.labelKey ? t(dashItem.labelKey, dashItem.labelDefault) : dashItem.labelDefault %></span>
+    </a>
+
+    <!-- Collapsible Functional Dropdowns -->
+    <% (sidebarSections || []).forEach((section) => { %>
+      <% 
+        const isAnyChildActive = section.items.some(item => (item.activePages || []).includes(activePage)); 
+        const collapseId = 'sb-collapse-' + section.key;
+      %>
+      <div class="sb-group <%= isAnyChildActive ? 'has-active' : '' %>" data-section="<%= section.key %>">
+        <button 
+          type="button" 
+          class="sb-group-header <%= isAnyChildActive ? 'open active-group' : '' %>" 
+          onclick="toggleSbGroup('<%= section.key %>')"
+          aria-expanded="<%= isAnyChildActive ? 'true' : 'false' %>"
+        >
+          <div class="sb-group-title">
+            <i class="<%= section.icon || 'bi bi-folder2' %> sb-group-icon"></i>
+            <span><%= section.labelKey ? t(section.labelKey, section.labelDefault) : section.labelDefault %></span>
+          </div>
+          <div class="sb-group-meta">
+            <span class="sb-group-count"><%= section.items.length %></span>
+            <i class="bi bi-chevron-down sb-chevron"></i>
+          </div>
+        </button>
+
+        <div class="sb-group-body <%= isAnyChildActive ? 'show' : '' %>" id="<%= collapseId %>">
+          <% section.items.forEach((item) => { %>
+            <% const isActive = (item.activePages || []).includes(activePage); %>
+            <a
+              href="<%= item.hrefResolved %>"
+              class="sb-sub-item <%= isActive ? 'active' : '' %>"
+            >
+              <i class="<%= item.icon %>"></i>
+              <span><%= item.labelKey ? t(item.labelKey, item.labelDefault) : item.labelDefault %></span>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    <% }) %>
+
+    <!-- Logout Item -->
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border);">
+      <a href="/admin/logout" class="sb-item logout" style="margin: 0 6px; border-radius: 8px;">
+        <i class="bi bi-box-arrow-left"></i><span><%= t('common.logout', 'Logout') %></span>
+      </a>
+    </div>
+
+    <div class="mt-4 px-3 py-2 text-center" style="color:#94a3b8;font-size:11px;font-weight:600">
+      NEXAID BILLING V2
+    </div>
+  </nav>
+  <script>
+    // Pemulihan scroll instan sesaat setelah markup sidebar selesai diparsing
+    (function() {
+      try {
+        var pos = sessionStorage.getItem('sb_scroll_pos');
+        if (pos !== null) {
+          var el = document.getElementById('sidebar');
+          if (el) el.scrollTop = parseInt(pos, 10);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</aside>
+
+<script>
+  function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    sb.classList.toggle('open');
+    ov.classList.toggle('show');
+  }
+
+  function toggleSbGroup(sectionKey) {
+    const group = document.querySelector(`.sb-group[data-section="${sectionKey}"]`);
+    if (!group) return;
+    const header = group.querySelector('.sb-group-header');
+    const body = group.querySelector('.sb-group-body');
+    const isOpen = header.classList.contains('open');
+
+    if (isOpen) {
+      header.classList.remove('open');
+      body.classList.remove('show');
+      header.setAttribute('aria-expanded', 'false');
+      saveSbGroupState(sectionKey, false);
+    } else {
+      header.classList.add('open');
+      body.classList.add('show');
+      header.setAttribute('aria-expanded', 'true');
+      saveSbGroupState(sectionKey, true);
+    }
+  }
+
+  function saveSbGroupState(sectionKey, isOpen) {
+    try {
+      const raw = localStorage.getItem('sb_accordion_state');
+      const state = raw ? JSON.parse(raw) : {};
+      state[sectionKey] = isOpen;
+      localStorage.setItem('sb_accordion_state', JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function restoreSbGroupStates() {
+    try {
+      const raw = localStorage.getItem('sb_accordion_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        Object.keys(state).forEach(key => {
+          const group = document.querySelector(`.sb-group[data-section="${key}"]`);
+          if (group) {
+            const header = group.querySelector('.sb-group-header');
+            const body = group.querySelector('.sb-group-body');
+            // Jangan collapse grup yang sedang aktif halamannya
+            if (!group.classList.contains('has-active')) {
+              if (state[key]) {
+                header.classList.add('open');
+                body.classList.add('show');
+                header.setAttribute('aria-expanded', 'true');
+              } else {
+                header.classList.remove('open');
+                body.classList.remove('show');
+                header.setAttribute('aria-expanded', 'false');
+              }
+            }
+          }
+        });
+      }
+    } catch (_) {}
+
+    initSidebarScrollPersistence();
+  }
+
+  function initSidebarScrollPersistence() {
+    const sb = document.getElementById('sidebar');
+    if (!sb) return;
+
+    // Restore scroll position
+    const savedPos = sessionStorage.getItem('sb_scroll_pos');
+    if (savedPos !== null) {
+      sb.scrollTop = parseInt(savedPos, 10);
+    }
+
+    // Pastikan item yang aktif terlihat dan tidak terpotong di luar viewport sidebar
+    ensureActiveItemVisible(sb);
+
+    // Simpan posisi scroll sidebar secara berkala saat pengguna menggulir
+    let scrollTimer;
+    sb.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        sessionStorage.setItem('sb_scroll_pos', sb.scrollTop);
+      }, 50);
+    }, { passive: true });
+
+    // Simpan posisi scroll saat item menu / link di klik
+    sb.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        sessionStorage.setItem('sb_scroll_pos', sb.scrollTop);
+      });
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (sb) sessionStorage.setItem('sb_scroll_pos', sb.scrollTop);
+    });
+  }
+
+  function ensureActiveItemVisible(sb) {
+    if (!sb) sb = document.getElementById('sidebar');
+    if (!sb) return;
+
+    const activeItem = sb.querySelector('.sb-sub-item.active, .sb-item.active');
+    if (!activeItem) return;
+
+    // Pastikan grup penampung menu aktif selalu dalam keadaan terbuka
+    const parentGroup = activeItem.closest('.sb-group');
+    if (parentGroup) {
+      const header = parentGroup.querySelector('.sb-group-header');
+      const body = parentGroup.querySelector('.sb-group-body');
+      if (header && !header.classList.contains('open')) {
+        header.classList.add('open');
+        header.setAttribute('aria-expanded', 'true');
+      }
+      if (body && !body.classList.contains('show')) {
+        body.classList.add('show');
+      }
+    }
+
+    // Periksa apakah item aktif terlihat di layar sidebar, jika di luar pandangan otomatis scroll ke posisinya
+    setTimeout(() => {
+      const sbRect = sb.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      const isOutside = itemRect.top < sbRect.top + 50 || itemRect.bottom > sbRect.bottom - 50;
+
+      if (isOutside) {
+        activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }, 60);
+  }
+
+  document.addEventListener('DOMContentLoaded', restoreSbGroupStates);
+</script>
+<script src="/js/theme.js"></script>
+
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="bottom-nav" id="bottomNav">
+  <% (sidebarBottomNavItems || []).slice(0, 4).forEach((item) => { %>
+    <a
+      href="<%= item.hrefResolved %>"
+      class="bn-item <%= (item.activePages || []).includes(activePage) ? 'active' : '' %>"
+    >
+      <i class="<%= item.icon %>"></i>
+      <span><%= item.labelKey ? t(item.labelKey, item.labelDefault) : item.labelDefault %></span>
+    </a>
+  <% }) %>
+  <button class="bn-item" onclick="toggleSidebar()">
+    <i class="bi bi-grid-3x3-gap"></i>
+    <span><%= t('common.menu', 'Menu') %></span>
+  </button>
+</nav>

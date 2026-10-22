@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="borderGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#06b6d4" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Container with Gradient Border -->
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#borderGrad)"/>
+  
+  <!-- Inner Dark Background -->
+  <rect x="36" y="36" width="440" height="440" rx="98" fill="#080c15"/>
+
+  <!-- Subtle Radial Glow -->
+  <circle cx="256" cy="256" r="160" fill="#2563eb" opacity="0.12"/>
+
+  <!-- Modern Sharp Lightning Bolt -->
+  <path d="M282 72 L154 272 H266 L230 440 L362 240 H248 Z" fill="url(#boltGrad)" filter="url(#glow)"/>
+</svg>
+

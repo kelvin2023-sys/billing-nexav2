@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+
+# Environment and Secrets
+.env
+*.env
+settings.json
+*.jks
+*.keystore
+local.properties
+
+# Generated application packages
+*.apk
+*.aab
+
+# Database files
+database/*.db
+storage/
+database/*.db-shm
+database/*.db-wal
+database/*.sqlite
+database.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# WhatsApp Sessions & Auth
+auth_info_baileys/
+
+# Runtime uploads and local editor backups
+public/uploads/
+*.bak
+data/wwebjs_auth/
+data/test_wwebjs_auth/
+data/wa-lid-map.json
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Android Build & Caches
+.gradle/
+.kotlin/
+build/
+android-app/.gradle/
+android-app/.kotlin/
+android-app/app/build/
+android-app/build/
+android-app/local.properties
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Backups and temporary files
+.local/
+backups/
+scratch/
+scratch_tz_scan.json
+temp/
+tmp/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.pptx

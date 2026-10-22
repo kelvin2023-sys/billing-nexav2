@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="<%= typeof lang !== 'undefined' ? lang : 'id' %>">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title><%= settings.company_header || 'NexaID Billing' %> - Portal Layanan & Internet Fiber Optic Tercepat</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+
+  <!-- Tailwind CSS v3 with Plugins -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#070B14">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png?v=2">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=2">
+  <link rel="shortcut icon" href="/favicon.ico?v=2">
+
+  <!-- Tailwind Custom Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            surface: {
+              dark: '#080c15',
+              card: '#0f172a',
+              cardHover: '#131e36',
+              border: 'rgba(51, 65, 85, 0.45)',
+              glow: 'rgba(59, 130, 246, 0.12)'
+            },
+            accent: {
+              gold: '#f59e0b',
+              goldHover: '#d97706',
+              cyan: '#06b6d4',
+              emerald: '#10b981'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-blue': '0 0 35px -5px rgba(37, 99, 235, 0.3)',
+            'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.25)',
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style data-purpose="base-styling">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #070B14;
+      color: #E2E8F0;
+      overflow-x: hidden;
+    }
+    .hero-glow-bg {
+      background: radial-gradient(circle at 50% 15%, rgba(37, 99, 235, 0.18) 0%, rgba(7, 11, 20, 0) 70%);
+    }
+    .glass-nav {
+      background: rgba(11, 17, 32, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-interactive {
+      transition: all 0.25s ease-in-out;
+    }
+    .glass-card-interactive:hover {
+      border-color: rgba(96, 165, 250, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 30px -10px rgba(37, 99, 235, 0.2);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- BEGIN: MainHeader -->
+  <header class="fixed top-0 left-0 w-full z-50 glass-nav border-b border-slate-800/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo Brand -->
+      <a aria-label="Home" class="flex items-center gap-3 group" href="#beranda">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-cyan-400 p-0.5 shadow-glow-blue flex items-center justify-center group-hover:scale-105 transition-transform overflow-hidden">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center p-1">
+            <img src="/img/logo.png" alt="Logo" class="max-h-full max-w-full object-contain" onerror="this.style.display='none'; document.getElementById('default-icon').style.display='block';">
+            <i id="default-icon" class="fa-solid fa-bolt-lightning text-cyan-400 text-lg hidden"></i>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xl font-extrabold tracking-tight text-white"><%= settings.company_header || 'NexaID Billing' %></span>
+            <span class="text-xs uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">FIBER</span>
+          </div>
+          <span class="text-[11px] font-medium tracking-wide text-slate-400 uppercase">Billing & Customer Portal</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links with Modern Dropdowns -->
+      <nav class="hidden lg:flex items-center gap-1.5 text-sm font-medium text-slate-300">
+        <!-- 1. Beranda -->
+        <a class="px-3 py-2 rounded-xl text-white hover:bg-slate-800/60 transition-colors flex items-center gap-2" href="#beranda">
+          <i class="fa-solid fa-house-chimney text-xs text-brand-400"></i>
+          <span>Beranda</span>
+        </a>
+
+        <!-- 2. Dropdown: Layanan & Paket -->
+        <div class="relative group">
+          <button type="button" class="px-3 py-2 rounded-xl hover:text-white hover:bg-slate-800/60 transition-colors flex items-center gap-2 focus:outline-none">
+            <i class="fa-solid fa-wifi text-xs text-cyan-400"></i>
+            <span>Layanan &amp; Paket</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 group-hover:rotate-180"></i>
+          </button>
+          <div class="absolute left-0 mt-2 w-72 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/70 rounded-2xl shadow-2xl p-2.5 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+            <a href="#paket" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-list-check text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-cyan-400 transition-colors">Paket &amp; Tarif Internet</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Pilihan kecepatan &amp; harga bulanan</p>
+              </div>
+            </a>
+            <a href="/customer/register" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-emerald-400 transition-colors">Daftar Pasang Baru</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Registrasi jaringan fiber optik baru</p>
+              </div>
+            </a>
+            <a href="/customer/voucher" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-ticket text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-amber-400 transition-colors">Beli Voucher Hotspot</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Beli kode voucher Wi-Fi via QRIS</p>
+              </div>
+            </a>
+            <a href="#keunggulan" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-shield-halved text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-blue-400 transition-colors">Keunggulan Jaringan</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">100% Fiber Optic, No FUP &amp; 99.9% SLA</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. Dropdown: Layanan Mandiri (Self Service) -->
+        <div class="relative group">
+          <button type="button" class="px-3 py-2 rounded-xl hover:text-white hover:bg-slate-800/60 transition-colors flex items-center gap-2 focus:outline-none">
+            <i class="fa-regular fa-calendar-check text-xs text-brand-400"></i>
+            <span>Layanan Mandiri</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 group-hover:rotate-180"></i>
+          </button>
+          <div class="absolute left-0 mt-2 w-72 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/70 rounded-2xl shadow-2xl p-2.5 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+            <a href="/customer/check-billing" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-receipt text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-brand-400 transition-colors">Cek &amp; Bayar Tagihan</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Cek rincian invoice &amp; bayar online</p>
+              </div>
+            </a>
+            <a href="https://fast.com" target="_blank" rel="noopener" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-gauge-high text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-cyan-400 transition-colors">Uji Kecepatan (Speedtest)</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Tes kecepatan download &amp; upload</p>
+              </div>
+            </a>
+            <a href="<%= settings.company_phone ? 'https://wa.me/' + String(settings.company_phone).replace(/\\D/g, '') : '#informasi' %>" target="_blank" rel="noopener" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-headset text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-rose-400 transition-colors">Pusat Bantuan &amp; CS</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Laporkan kendala &amp; respon cepat</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. Dropdown: Portal Akses Petugas -->
+        <div class="relative group">
+          <button type="button" class="px-3 py-2 rounded-xl hover:text-white hover:bg-slate-800/60 transition-colors flex items-center gap-2 focus:outline-none">
+            <i class="fa-solid fa-users-gear text-xs text-purple-400"></i>
+            <span>Portal Akses</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 group-hover:rotate-180"></i>
+          </button>
+          <div class="absolute left-0 mt-2 w-72 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/70 rounded-2xl shadow-2xl p-2.5 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+            <a href="/admin" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-shield text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-blue-400 transition-colors">Portal Administrator</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Dashboard manajemen billing &amp; jaringan</p>
+              </div>
+            </a>
+            <a href="/tech" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-wrench text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-cyan-400 transition-colors">Portal Teknisi Lapangan</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Peta ODP, cek ONU &amp; tiket SPK</p>
+              </div>
+            </a>
+            <a href="/agent" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-shop text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-amber-400 transition-colors">Mitra Agen &amp; Reseller</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Loket bayar tagihan &amp; penjualan pulsa</p>
+              </div>
+            </a>
+            <a href="/collector" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-colors group/item">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform">
+                <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white group-hover/item:text-emerald-400 transition-colors">Petugas Kolektor</div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Penagihan lapangan &amp; cetak struk</p>
+              </div>
+            </a>
+            <div class="pt-2 mt-1 border-t border-slate-800">
+              <button type="button" onclick="triggerPwaInstall()" class="w-full flex items-center justify-between p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-all text-xs font-semibold">
+                <span class="flex items-center gap-2">
+                  <i class="fa-solid fa-mobile-screen-button text-xs"></i>
+                  <span>Install Aplikasi Pelanggan</span>
+                </span>
+                <i class="fa-solid fa-download text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Informasi & Legal -->
+        <a class="px-3 py-2 rounded-xl hover:text-white hover:bg-slate-800/60 transition-colors flex items-center gap-2" href="#informasi">
+          <i class="fa-solid fa-circle-info text-xs text-amber-400"></i>
+          <span>Informasi</span>
+        </a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2.5">
+        <!-- Cek Tagihan Cepat -->
+        <a class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 hover:text-white transition-all shadow-sm" href="/customer/check-billing">
+          <i class="fa-regular fa-receipt text-xs text-brand-400"></i>
+          <span>Cek Tagihan</span>
+        </a>
+
+        <!-- Masuk Portal Primary Button -->
+        <a class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white shadow-glow-blue hover:shadow-lg transition-all duration-200" href="#portal">
+          <i class="fa-solid fa-right-to-bracket text-xs"></i>
+          <span>Masuk Portal</span>
+        </a>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button type="button" onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700">
+          <i class="fa-solid fa-bars text-base"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Navigation Drawer Grouped -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-800 bg-slate-950/98 backdrop-blur-2xl px-4 py-5 space-y-4 max-h-[85vh] overflow-y-auto">
+      
+      <!-- Kategori 1: Navigasi Utama -->
+      <div>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5">Navigasi Utama</div>
+        <div class="space-y-1">
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-white font-medium hover:bg-slate-800/60" href="#beranda" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-house-chimney text-xs text-brand-400 w-4"></i>
+            <span>Beranda</span>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="#paket" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-list-check text-xs text-cyan-400 w-4"></i>
+            <span>Paket &amp; Tarif Internet</span>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="/customer/register">
+            <i class="fa-solid fa-user-plus text-xs text-emerald-400 w-4"></i>
+            <span>Daftar Pasang Baru</span>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="/customer/voucher">
+            <i class="fa-solid fa-ticket text-xs text-amber-400 w-4"></i>
+            <span>Beli Voucher Hotspot</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Kategori 2: Layanan Mandiri -->
+      <div class="pt-2 border-t border-slate-800/80">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5">Layanan Mandiri</div>
+        <div class="space-y-1">
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="/customer/check-billing">
+            <i class="fa-regular fa-receipt text-xs text-brand-400 w-4"></i>
+            <span>Cek &amp; Bayar Tagihan</span>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="https://fast.com" target="_blank" rel="noopener">
+            <i class="fa-solid fa-gauge-high text-xs text-cyan-400 w-4"></i>
+            <span>Uji Kecepatan (Speedtest)</span>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="#keunggulan" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-shield-halved text-xs text-blue-400 w-4"></i>
+            <span>Keunggulan Layanan</span>
+          </a>
+          <a class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 font-medium hover:bg-slate-800/60" href="#informasi" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-circle-info text-xs text-amber-400 w-4"></i>
+            <span>Informasi Perusahaan</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Kategori 3: Portal Petugas & Aplikasi -->
+      <div class="pt-2 border-t border-slate-800/80">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5">Portal Petugas &amp; Aplikasi</div>
+        <div class="grid grid-cols-2 gap-2 mb-2.5">
+          <a class="text-center py-2 px-3 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white" href="/admin">Admin Panel</a>
+          <a class="text-center py-2 px-3 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white" href="/tech">Teknisi</a>
+          <a class="text-center py-2 px-3 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white" href="/agent">Mitra Agen</a>
+          <a class="text-center py-2 px-3 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white" href="/collector">Kolektor</a>
+        </div>
+        <button type="button" onclick="triggerPwaInstall()" class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-download text-xs"></i>
+          <span>Install Aplikasi Pelanggan</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+  <!-- END: MainHeader -->
+
+  <!-- BEGIN: MainContent -->
+  <main class="flex-grow pt-24 sm:pt-28">
+
+    <!-- BEGIN: HeroSection -->
+    <section class="relative hero-glow-bg pt-8 pb-16 lg:pt-14 lg:pb-24" id="beranda">
+      <!-- Decorative Background Orbs -->
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-600/10 rounded-full blur-[110px] pointer-events-none -z-10"></div>
+      <div class="absolute top-1/3 right-10 w-[350px] h-[250px] bg-cyan-600/10 rounded-full blur-[90px] pointer-events-none -z-10"></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          
+          <!-- Left Column: Hero Content & CTAs -->
+          <div class="lg:col-span-7 flex flex-col items-start space-y-6">
+            <!-- Live Badge Tag -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border-brand-500/30 text-brand-400 text-xs sm:text-sm font-semibold tracking-wide">
+              <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              </span>
+              <span>⚡ Jaringan Internet Fiber Optic Super Cepat & Unlimited 100%</span>
+            </div>
+
+            <!-- Main Heading -->
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.18]">
+              Nikmati Koneksi Internet Terbaik <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-300">Tanpa Batas Kuota</span>
+            </h1>
+
+            <!-- Description -->
+            <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl font-normal">
+              Selamat datang di portal resmi <strong class="text-white font-semibold"><%= settings.company_header || 'NexaID Billing' %></strong>. Kami menghadirkan jaringan internet ultra cepat, stabil dengan latency ultra rendah, dan terjangkau untuk kebutuhan rumah tangga, gaming kompetitif, bisnis, hingga produktivitas tanpa jeda.
+            </p>
+
+            <!-- Hero Action Buttons -->
+            <div class="flex flex-wrap items-center gap-3.5 pt-2 w-full sm:w-auto">
+              <a class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-glow-blue hover:-translate-y-0.5 transition-all" href="/customer/register">
+                <i class="fa-solid fa-user-plus text-sm"></i>
+                <span>Daftar Pasang Baru</span>
+              </a>
+              <button type="button" onclick="triggerPwaInstall()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-glow-amber hover:-translate-y-0.5 transition-all">
+                <i class="fa-solid fa-mobile-screen-button text-sm"></i>
+                <span>Install Aplikasi Pelanggan</span>
+              </button>
+            </div>
+
+            <!-- Single Line Quick Button -->
+            <div class="w-full pt-1">
+              <a class="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 px-6 py-3 rounded-xl text-sm font-semibold glass-card hover:bg-slate-800/80 border border-slate-700/80 text-slate-200 hover:text-white transition-all" href="/customer/check-billing">
+                <i class="fa-regular fa-calendar-check text-cyan-400"></i>
+                <span>Cek Tagihan Saya Cepat &amp; Praktis</span>
+                <i class="fa-solid fa-arrow-right text-xs text-slate-400 ml-1"></i>
+              </a>
+            </div>
+
+            <!-- Key Feature Badges Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full pt-4">
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/90">
+                <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+                  <i class="fa-solid fa-gauge-high text-sm"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">100% Fiber</div>
+                  <div class="text-[11px] text-slate-400">Optic Murni</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/90">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                  <i class="fa-solid fa-infinity text-sm"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">No FUP</div>
+                  <div class="text-[11px] text-slate-400">Bebas Kuota</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/90">
+                <div class="w-9 h-9 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 shrink-0">
+                  <i class="fa-solid fa-shield-heart text-sm"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">99.9% SLA</div>
+                  <div class="text-[11px] text-slate-400">Uptime Tinggi</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/90">
+                <div class="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+                  <i class="fa-solid fa-headset text-sm"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">24/7 Support</div>
+                  <div class="text-[11px] text-slate-400">CS & Teknisi</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Portal Pelanggan Glass Card -->
+          <div class="lg:col-span-5" id="portal">
+            <div class="relative">
+              <!-- Subtle decorative corner accent -->
+              <div class="absolute -top-4 -right-4 w-28 h-28 bg-brand-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+              <div class="glass-card rounded-2xl p-6 sm:p-8 border border-slate-700/60 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+                
+                <!-- Card Header -->
+                <div class="flex flex-col items-center text-center pb-6 border-b border-slate-800">
+                  <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-cyan-400 p-0.5 shadow-glow-blue mb-3">
+                    <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+                      <i class="fa-solid fa-user-shield text-2xl text-cyan-400"></i>
+                    </div>
+                  </div>
+                  <h2 class="text-xl font-bold text-white tracking-wide">Portal Pelanggan</h2>
+                  <p class="text-xs text-slate-400 mt-1">Masuk untuk cek tagihan, riwayat transaksi &amp; kontrol Wi-Fi</p>
+                </div>
+
+                <!-- Card Form -->
+                <form class="mt-6 space-y-4" method="POST" action="/customer/login">
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="phone">
+                      ID Pelanggan / No. WhatsApp
+                    </label>
+                    <div class="relative">
+                      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-regular fa-id-card text-sm"></i>
+                      </div>
+                      <input 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="Contoh: NX-882194 / 081234xxxx" 
+                        type="text" 
+                        required 
+                        autofocus
+                      />
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-info text-cyan-400"></i>
+                      Gunakan nomor WhatsApp aktif yang didaftarkan pada sistem.
+                    </p>
+                  </div>
+
+                  <% if (settings.login_otp_enabled) { %>
+                    <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs flex items-center gap-2">
+                      <i class="fa-brands fa-whatsapp text-sm text-emerald-400"></i>
+                      <span>Kode verifikasi OTP akan otomatis dikirimkan via WhatsApp.</span>
+                    </div>
+                  <% } %>
+
+                  <!-- Submit Button -->
+                  <button class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white shadow-glow-blue hover:shadow-lg transition-all flex items-center justify-center gap-2" type="submit">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Masuk Portal Layanan</span>
+                  </button>
+
+                  <% if (error) { %>
+                    <div class="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                      <i class="fa-solid fa-triangle-exclamation text-sm text-rose-400 shrink-0"></i>
+                      <span><%= error === 'Nomor HP tidak valid atau belum terdaftar.' ? 'ID Pelanggan atau nomor WhatsApp tidak terdaftar.' : error %></span>
+                    </div>
+                  <% } %>
+
+                  <!-- Secondary Actions Grid -->
+                  <div class="grid grid-cols-2 gap-3 pt-2">
+                    <a class="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition-all" href="/customer/check-billing">
+                      <i class="fa-regular fa-file-lines text-cyan-400"></i>
+                      <span>Cek Tagihan</span>
+                    </a>
+                    <a class="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition-all" href="/customer/voucher">
+                      <i class="fa-solid fa-ticket text-amber-400"></i>
+                      <span>Beli Voucher</span>
+                    </a>
+                  </div>
+
+                  <!-- Register Link -->
+                  <div class="text-center pt-3 border-t border-slate-800/80">
+                    <p class="text-xs text-slate-400">
+                      Belum berlangganan? 
+                      <a class="text-brand-400 hover:text-brand-300 font-semibold underline underline-offset-4 ml-1 inline-flex items-center gap-1" href="/customer/register">
+                        Daftar Pemasangan Baru <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                      </a>
+                    </p>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- END: HeroSection -->
+
+    <!-- BEGIN: PricingPlansSection -->
+    <section class="py-20 bg-slate-950/60 border-t border-slate-800/80 relative" id="paket">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Section Header -->
+        <div class="text-center max-w-3xl mx-auto space-y-3 mb-14">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold uppercase tracking-wider">
+            <i class="fa-solid fa-wifi text-xs"></i> Pilihan Paket Internet
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Paket &amp; Tarif Layanan Kami
+          </h2>
+          <p class="text-sm sm:text-base text-slate-400">
+            Pilih kecepatan koneksi yang sesuai dengan kebutuhan aktivitas digital Anda, dari penggunaan rumah tangga, gaming turnamen, hingga kebutuhan korporasi.
+          </p>
+        </div>
+
+        <!-- Plans Cards Grid -->
+        <% const pkgs = (typeof packages !== 'undefined' && Array.isArray(packages)) ? packages : []; %>
+        <% if (pkgs.length > 0) { %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <% const sortedPkgs = pkgs.slice().sort((a,b) => Number(a.price||0) - Number(b.price||0)); %>
+            <% sortedPkgs.forEach((p, index) => { %>
+              <% const isPopular = index === Math.floor(sortedPkgs.length / 2); %>
+              <div class="glass-card rounded-2xl p-6 border <%= isPopular ? 'border-2 border-brand-500/80 bg-slate-900/80 shadow-glow-blue' : 'border-slate-800' %> flex flex-col justify-between glass-card-interactive relative">
+                <% if (isPopular) { %>
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span class="bg-gradient-to-r from-brand-600 to-cyan-500 text-white font-bold text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md">
+                      Paling Diminati 🔥
+                    </span>
+                  </div>
+                <% } %>
+                <div>
+                  <div class="flex items-center justify-between mb-4 <%= isPopular ? 'mt-1' : '' %>">
+                    <span class="text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-md <%= isPopular ? 'bg-brand-500/20 text-brand-300 border border-brand-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700' %>">
+                      Fiber Optic
+                    </span>
+                    <i class="fa-solid fa-wifi <%= isPopular ? 'text-brand-400' : 'text-slate-500' %> text-lg"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-white"><%= p.name %></h3>
+                  <p class="text-xs text-slate-400 mt-1 mb-5"><%= p.description || 'Koneksi internet fiber optic stabil dan unlimited tanpa FUP.' %></p>
+                  
+                  <div class="flex items-baseline gap-1 mb-6">
+                    <% if (Number(p.speed_down||0) > 0) { %>
+                      <span class="text-3xl font-extrabold text-white">
+                        <%= (Math.round(Number(p.speed_down||0)/1000) >= 1) ? Math.round(Number(p.speed_down||0)/1000) : Number(p.speed_down||0) %>
+                      </span>
+                      <span class="text-sm font-semibold text-slate-400">
+                        <%= (Math.round(Number(p.speed_down||0)/1000) >= 1) ? 'Mbps' : 'Kbps' %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-2xl font-extrabold text-white">Dedicated</span>
+                    <% } %>
+                    <span class="text-xs text-slate-500 ml-auto">Simetris 1:1</span>
+                  </div>
+
+                  <div class="py-4 border-y border-slate-800/80 space-y-3 text-xs text-slate-300">
+                    <div class="flex items-center gap-2.5">
+                      <i class="fa-solid fa-check text-cyan-400"></i>
+                      <span>Unlimited 100% Tanpa FUP</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                      <i class="fa-solid fa-check text-cyan-400"></i>
+                      <span>Koneksi Fiber Optic Dedicated</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                      <i class="fa-solid fa-check text-cyan-400"></i>
+                      <span>Termasuk Modem Dual Band</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                      <i class="fa-solid fa-check text-cyan-400"></i>
+                      <span>Dukungan CS & Teknisi 24/7</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-6 pt-2">
+                  <div class="text-xs text-slate-400 mb-1">Mulai dari</div>
+                  <div class="flex items-baseline gap-1 mb-4">
+                    <span class="text-xs font-semibold text-slate-400">Rp</span>
+                    <span class="text-2xl font-black text-white"><%= Number(p.price||0).toLocaleString('id-ID') %></span>
+                    <span class="text-xs text-slate-400">/bln</span>
+                  </div>
+                  <a class="w-full py-2.5 rounded-xl font-bold text-xs <%= isPopular ? 'bg-brand-600 hover:bg-brand-500 text-white shadow-glow-blue' : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700' %> flex items-center justify-center gap-2 transition-all" href="/customer/register?package=<%= encodeURIComponent(p.name) %>">
+                    <span>Pilih Paket Ini</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                  </a>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <!-- Default Preset Showcase if DB is fresh -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Plan 1: Starter -->
+            <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between glass-card-interactive relative">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">Home Basic</span>
+                  <i class="fa-solid fa-house-signal text-slate-500 text-lg"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Starter Fiber</h3>
+                <p class="text-xs text-slate-400 mt-1 mb-5">Browsing santai, streaming HD & media sosial keluarga.</p>
+                <div class="flex items-baseline gap-1 mb-6">
+                  <span class="text-3xl font-extrabold text-white">30</span>
+                  <span class="text-sm font-semibold text-slate-400">Mbps</span>
+                  <span class="text-xs text-slate-500 ml-auto">Simetris 1:1</span>
+                </div>
+                <div class="py-4 border-y border-slate-800/80 space-y-3 text-xs text-slate-300">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Unlimited 100% Tanpa FUP</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Ideal 3 - 5 Perangkat</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Termasuk Modem Dual Band</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Gratis Biaya Instalasi Normal</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 pt-2">
+                <div class="text-xs text-slate-400 mb-1">Mulai dari</div>
+                <div class="flex items-baseline gap-1 mb-4">
+                  <span class="text-xs font-semibold text-slate-400">Rp</span>
+                  <span class="text-2xl font-black text-white">175.000</span>
+                  <span class="text-xs text-slate-400">/bln</span>
+                </div>
+                <a class="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center justify-center gap-2 transition-all" href="/customer/register">
+                  <span>Pilih Starter</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Plan 2: Fast / Popular -->
+            <div class="glass-card rounded-2xl p-6 border-2 border-brand-500/80 bg-slate-900/80 flex flex-col justify-between glass-card-interactive relative shadow-glow-blue">
+              <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span class="bg-gradient-to-r from-brand-600 to-cyan-500 text-white font-bold text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md">
+                  Paling Diminati 🔥
+                </span>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-4 mt-1">
+                  <span class="text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-md bg-brand-500/20 text-brand-300 border border-brand-500/30">Fast Gamer</span>
+                  <i class="fa-solid fa-gamepad text-brand-400 text-lg"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Gamer Pro Fiber</h3>
+                <p class="text-xs text-slate-300 mt-1 mb-5">Ping super rendah untuk online gaming & streaming 4K tanpa buffer.</p>
+                <div class="flex items-baseline gap-1 mb-6">
+                  <span class="text-3xl font-extrabold text-white">75</span>
+                  <span class="text-sm font-semibold text-brand-400">Mbps</span>
+                  <span class="text-xs text-cyan-400 ml-auto font-medium">Low Latency Route</span>
+                </div>
+                <div class="py-4 border-y border-slate-700/60 space-y-3 text-xs text-slate-200">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Unlimited 100% No FUP</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Ideal 6 - 10 Perangkat Aktif</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Router Wi-Fi 6 High Power</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Prioritas Routing Game Server</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 pt-2">
+                <div class="text-xs text-slate-400 mb-1">Mulai dari</div>
+                <div class="flex items-baseline gap-1 mb-4">
+                  <span class="text-xs font-semibold text-slate-400">Rp</span>
+                  <span class="text-2xl font-black text-white">265.000</span>
+                  <span class="text-xs text-slate-400">/bln</span>
+                </div>
+                <a class="w-full py-2.5 rounded-xl font-bold text-xs bg-brand-600 hover:bg-brand-500 text-white shadow-glow-blue flex items-center justify-center gap-2 transition-all" href="/customer/register">
+                  <span>Pilih Gamer Pro</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Plan 3: Ultimate Fiber -->
+            <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between glass-card-interactive relative">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">Family Max</span>
+                  <i class="fa-solid fa-tower-broadcast text-slate-400 text-lg"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Ultimate Fiber</h3>
+                <p class="text-xs text-slate-400 mt-1 mb-5">Untuk keluarga besar, download file jumbo & smart home terhubung.</p>
+                <div class="flex items-baseline gap-1 mb-6">
+                  <span class="text-3xl font-extrabold text-white">150</span>
+                  <span class="text-sm font-semibold text-slate-400">Mbps</span>
+                  <span class="text-xs text-slate-500 ml-auto">Simetris 1:1</span>
+                </div>
+                <div class="py-4 border-y border-slate-800/80 space-y-3 text-xs text-slate-300">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Unlimited Kuota Sepuasnya</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Ideal 12 - 18 Perangkat</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Dual Band Wi-Fi 6 Mesh Ready</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Prioritas CS Premium Support</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 pt-2">
+                <div class="text-xs text-slate-400 mb-1">Mulai dari</div>
+                <div class="flex items-baseline gap-1 mb-4">
+                  <span class="text-xs font-semibold text-slate-400">Rp</span>
+                  <span class="text-2xl font-black text-white">395.000</span>
+                  <span class="text-xs text-slate-400">/bln</span>
+                </div>
+                <a class="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center justify-center gap-2 transition-all" href="/customer/register">
+                  <span>Pilih Ultimate</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Plan 4: Enterprise SME -->
+            <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between glass-card-interactive relative">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">Office / SME</span>
+                  <i class="fa-solid fa-briefcase text-amber-400 text-lg"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Enterprise Biz</h3>
+                <p class="text-xs text-slate-400 mt-1 mb-5">Solusi bisnis kantor, cafe, coworking space & uptime prioritas tinggi.</p>
+                <div class="flex items-baseline gap-1 mb-6">
+                  <span class="text-3xl font-extrabold text-white">300</span>
+                  <span class="text-sm font-semibold text-slate-400">Mbps</span>
+                  <span class="text-xs text-amber-400 ml-auto font-medium">Dedicated IP Available</span>
+                </div>
+                <div class="py-4 border-y border-slate-800/80 space-y-3 text-xs text-slate-300">
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Unlimited Kuota & SLA 99.9%</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Dukungan 20 - 40+ Perangkat</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Dedicated Router Enterprise</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-check text-cyan-400"></i>
+                    <span>Dedicated Support Account Manager</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 pt-2">
+                <div class="text-xs text-slate-400 mb-1">Mulai dari</div>
+                <div class="flex items-baseline gap-1 mb-4">
+                  <span class="text-xs font-semibold text-slate-400">Rp</span>
+                  <span class="text-2xl font-black text-white">650.000</span>
+                  <span class="text-xs text-slate-400">/bln</span>
+                </div>
+                <a class="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center justify-center gap-2 transition-all" href="/customer/register">
+                  <span>Pilih Enterprise</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Custom Request Banner -->
+        <div class="mt-10 p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4 text-center sm:text-left">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-network-wired text-xl"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-white">Butuh Bandwidth Kustom Dedicated / Multi-Giga?</h4>
+              <p class="text-xs text-slate-400 mt-0.5">Kami melayani sambungan fiber optic dedicated langsung ke lokasi bisnis Anda dengan IP Publik statis.</p>
+            </div>
+          </div>
+          <a class="px-5 py-2.5 rounded-xl text-xs font-bold bg-white text-slate-900 hover:bg-slate-100 shrink-0 transition-all" href="<%= settings.company_phone ? 'https://wa.me/' + String(settings.company_phone).replace(/\\D/g, '') : '#' %>" target="_blank" rel="noopener">
+            Konsultasi dengan Tim Teknis
+          </a>
+        </div>
+
+      </div>
+    </section>
+    <!-- END: PricingPlansSection -->
+
+    <!-- BEGIN: WhyChooseUsSection -->
+    <section class="py-20 relative" id="keunggulan">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Section Header -->
+        <div class="text-center max-w-2xl mx-auto space-y-3 mb-14">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+            <i class="fa-solid fa-star text-xs"></i> Keunggulan Layanan
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Mengapa Memilih <%= settings.company_header || 'NexaID Billing' %>?
+          </h2>
+          <p class="text-sm sm:text-base text-slate-400">
+            Kami berkomitmen menghadirkan pengalaman berinternet terbaik tanpa hambatan dengan teknologi mutakhir dan tim pelayanan profesional.
+          </p>
+        </div>
+
+        <!-- Grid of Features -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 glass-card-interactive">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/25 text-blue-400 flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-arrows-up-down"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">Kecepatan Simetris 1:1</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Kecepatan upload dan download sama kencangnya. Sangat efisien untuk video conference, cloud backup, live streaming, dan transfer file besar.
+            </p>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 glass-card-interactive">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">100% No FUP (Unlimited)</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Internet bebas batas kuota tanpa penurunan kecepatan di akhir bulan. Nikmati performa maksimal dari tanggal satu hingga akhir bulan.
+            </p>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 glass-card-interactive">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">Pembayaran Otomatis</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Dukungan pembayaran instan dengan QRIS Real-time, Virtual Account Bank (BCA, Mandiri, BRI, BNI), serta dompet digital (GoPay, OVO, Dana).
+            </p>
+          </div>
+
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 glass-card-interactive">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/25 text-purple-400 flex items-center justify-center text-xl mb-4">
+              <i class="fa-solid fa-mobile-screen"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-2">Aplikasi Mandiri Pelanggan</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Pantau masa aktif, download invoice, lakukan tes kecepatan, serta laporkan gangguan teknis langsung dari genggaman via aplikasi portal.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- END: WhyChooseUsSection -->
+
+    <!-- BEGIN: SelfServiceSection -->
+    <section class="py-20 bg-slate-950/70 border-t border-slate-800/80" id="layanan-cepat">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Section Header -->
+        <div class="text-center max-w-2xl mx-auto space-y-3 mb-14">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider">
+            <i class="fa-solid fa-layer-group text-xs"></i> Fitur Portal
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Layanan Mandiri Pelanggan
+          </h2>
+          <p class="text-sm sm:text-base text-slate-400">
+            Nikmati kemudahan transaksi, pelaporan, dan pengelolaan akun internet Anda secara langsung dari portal web.
+          </p>
+        </div>
+
+        <!-- 4 Card Quick Actions -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="cek-tagihan">
+          <!-- Card 1: Cek Tagihan -->
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-between glass-card-interactive group">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+              <h3 class="text-base font-bold text-white mb-1.5">Cek Tagihan</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Periksa status pembayaran, nomor invoice, dan rincian tagihan bulanan Anda secara instan.
+              </p>
+            </div>
+            <a class="mt-6 inline-flex items-center gap-2 text-xs font-bold text-brand-400 hover:text-brand-300" href="/customer/check-billing">
+              <span>Cek Sekarang</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
+
+          <!-- Card 2: Beli Voucher Wi-Fi -->
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-between glass-card-interactive group" id="voucher">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-ticket"></i>
+              </div>
+              <h3 class="text-base font-bold text-white mb-1.5">Beli Voucher Wi-Fi</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Beli kode voucher hotspot Wi-Fi harian, mingguan, atau bulanan secara mandiri dengan QRIS otomatis.
+              </p>
+            </div>
+            <a class="mt-6 inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300" href="/customer/voucher">
+              <span>Beli Voucher</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
+
+          <!-- Card 3: Pasang Baru -->
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-between glass-card-interactive group" id="pasang-baru">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-user-plus"></i>
+              </div>
+              <h3 class="text-base font-bold text-white mb-1.5">Pasang Baru</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Daftar jaringan fiber optik baru untuk rumah, ruko, kontrakan, kantor, atau lokasi usaha Anda.
+              </p>
+            </div>
+            <a class="mt-6 inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300" href="/customer/register">
+              <span>Registrasi Baru</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
+
+          <!-- Card 4: Bantuan & Tiket -->
+          <div class="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-between glass-card-interactive group">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+              </div>
+              <h3 class="text-base font-bold text-white mb-1.5">Bantuan &amp; Tiket</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Laporkan kendala redaman fiber, router error, atau ajukan permintaan kunjungan teknisi ke lokasi.
+              </p>
+            </div>
+            <a class="mt-6 inline-flex items-center gap-2 text-xs font-bold text-rose-400 hover:text-rose-300" href="<%= settings.company_phone ? 'https://wa.me/' + String(settings.company_phone).replace(/\\D/g, '') : '#portal' %>" target="_blank" rel="noopener">
+              <span>Buka Bantuan</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- END: SelfServiceSection -->
+
+    <!-- BEGIN: CompanyInformationSection -->
+    <section class="py-16 border-t border-slate-800/80" id="informasi">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- Company Summary -->
+          <div class="lg:col-span-5 space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold uppercase tracking-wider">
+              <i class="fa-solid fa-building-shield text-xs text-brand-400"></i> Informasi Perusahaan
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white"><%= settings.company_header || 'NexaID Billing Service' %></h2>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              Kami siap memberikan pelayanan internet terbaik dengan kemudahan akses dan fleksibilitas tinggi. Jangan ragu untuk menghubungi tim teknis dan layanan pelanggan kami jika Anda memerlukan bantuan.
+            </p>
+            <% if (settings.company_address) { %>
+              <div class="flex items-start gap-3 pt-2 text-xs text-slate-300">
+                <i class="fa-solid fa-location-dot text-brand-400 mt-1"></i>
+                <span><%= settings.company_address %></span>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Operations & Service SLA Grid -->
+          <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Jam Operasional -->
+            <div class="glass-card p-5 rounded-2xl border border-slate-800 flex items-start gap-4">
+              <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <i class="fa-regular fa-clock text-lg"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white">Jam Operasional Layanan</h4>
+                <p class="text-xs text-slate-300 mt-1 font-semibold"><%= settings.operational_hours || 'Setiap Hari: 08.00 - 22.00 WIB' %></p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Monitoring NOC & Server Redundant 24 Jam Non-Stop</p>
+              </div>
+            </div>
+
+            <!-- Jaminan Layanan SLA -->
+            <div class="glass-card p-5 rounded-2xl border border-slate-800 flex items-start gap-4">
+              <div class="w-11 h-11 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-shield-halved text-lg"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white">Jaminan Mutu Layanan</h4>
+                <p class="text-xs text-brand-300 mt-1 font-semibold">SLA 99.9% Uptime Terjamin</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Dukungan Multi-Upstream Fiber & Backup Route</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- END: CompanyInformationSection -->
+
+  </main>
+  <!-- END: MainContent -->
+
+  <!-- BEGIN: MainFooter -->
+  <footer class="bg-[#05070D] border-t border-slate-800/80 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
+        
+        <!-- Brand Info -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 p-0.5 shadow-glow-blue flex items-center justify-center">
+              <div class="w-full h-full bg-slate-950 rounded-[9px] flex items-center justify-center">
+                <i class="fa-solid fa-bolt-lightning text-cyan-400 text-sm"></i>
+              </div>
+            </div>
+            <span class="text-lg font-bold text-white tracking-tight"><%= settings.company_header || 'NexaID Billing' %></span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed max-w-sm">
+            Penyedia layanan jaringan internet fiber optic handal dan terpercaya untuk memenuhi kebutuhan konektivitas digital rumah tangga, gaming, dan bisnis Anda.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <% if (settings.company_phone) { %>
+              <a aria-label="WhatsApp" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-white hover:border-slate-700 transition-colors" href="https://wa.me/<%= String(settings.company_phone).replace(/\\D/g, '') %>" target="_blank" rel="noopener">
+                <i class="fa-brands fa-whatsapp text-xs"></i>
+              </a>
+            <% } %>
+            <% if (settings.company_email) { %>
+              <a aria-label="Email" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-white hover:border-slate-700 transition-colors" href="mailto:<%= settings.company_email %>">
+                <i class="fa-solid fa-envelope text-xs"></i>
+              </a>
+            <% } %>
+            <a aria-label="Speedtest" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-white hover:border-slate-700 transition-colors" href="https://fast.com" target="_blank" rel="noopener">
+              <i class="fa-solid fa-gauge-high text-xs"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Portal Navigation -->
+        <div>
+          <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-4">Tautan Portal</h4>
+          <ul class="space-y-2.5">
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="#beranda"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Beranda</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="#paket"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Paket Internet</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/check-billing"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Cek &amp; Bayar Tagihan</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/voucher"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Beli Voucher Wi-Fi</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/register"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Pasang Baru</a></li>
+          </ul>
+        </div>
+
+        <!-- Management Portals -->
+        <div>
+          <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-4">Portal Petugas</h4>
+          <ul class="space-y-2.5">
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/admin"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Administrator</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/tech"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Teknisi Lapangan</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/agent"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Mitra Agen / Loket</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/collector"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Petugas Kolektor</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/downloads/billing-rtrw.apk"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Unduh APK Android</a></li>
+          </ul>
+        </div>
+
+        <!-- Legal Information -->
+        <div>
+          <h4 class="text-white font-bold text-xs uppercase tracking-wider mb-4">Informasi Legal</h4>
+          <ul class="space-y-2.5">
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/about"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Tentang Kami</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/contact"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Kontak Resmi</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/tos"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Ketentuan Layanan</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/privacy"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Kebijakan Privasi</a></li>
+            <li><a class="hover:text-white transition-colors flex items-center gap-1.5" href="/customer/tos#refund"><i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i> Kebijakan Refund</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Copyright Sub-Footer -->
+      <div class="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+        <div>
+          &copy; <%= new Date().getFullYear() %> <span class="text-slate-400 font-semibold"><%= settings.company_header || 'NexaID Billing' %></span>. All rights reserved.
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 text-slate-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Semua Sistem Normal
+          </span>
+          <span>•</span>
+          <span>Portal Pelanggan Internet v2.0</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- END: MainFooter -->
+
+  <!-- Floating PWA Install Banner -->
+  <div id="pwa-install-banner" class="fixed bottom-4 left-1/2 -translate-x-1/2 p-3 z-50 max-w-[92%] w-[440px] hidden">
+    <div class="glass-card p-3 shadow-2xl border border-amber-500/50 rounded-2xl flex items-center justify-between gap-3 text-white bg-slate-950/95 backdrop-blur-xl">
+      <div class="flex items-center gap-3">
+        <div class="bg-amber-500/20 p-2 rounded-xl text-amber-400 border border-amber-500/25 flex items-center justify-center w-11 h-11 shrink-0">
+          <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+        </div>
+        <div>
+          <h6 class="font-bold text-xs text-amber-400">Install Aplikasi Pelanggan</h6>
+          <p class="text-slate-400 text-[11px] leading-tight">Akses cepat & praktis langsung dari Home Screen!</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl shadow transition-all" onclick="triggerPwaInstall()">
+          Install
+        </button>
+        <button type="button" class="text-slate-400 hover:text-white p-1" onclick="dismissPwaBanner()">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Install Guide Modal -->
+  <div id="pwaInstallModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl p-6 max-w-md w-full border border-slate-700 bg-slate-900 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h5 class="font-bold text-amber-400 flex items-center gap-2 text-sm sm:text-base">
+          <i class="fa-solid fa-download"></i> Cara Install Aplikasi Pelanggan
+        </h5>
+        <button onclick="closePwaModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Nikmati akses instan ke <strong>Portal Pelanggan <%= settings.company_header || 'NexaID' %></strong> langsung dari layar utama HP / Komputer tanpa perlu mengetik URL tiap kali cek tagihan.
+      </p>
+
+      <!-- Android / Chrome / Windows -->
+      <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+        <h6 class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+          <i class="fa-brands fa-android"></i> Android / Chrome / Laptop Windows
+        </h6>
+        <ol class="text-[11px] text-slate-300 list-decimal list-inside space-y-1">
+          <li>Klik tombol <strong>"Install Sekarang"</strong> di bawah.</li>
+          <li>Tekan <strong>Install / Tambahkan</strong> pada dialog browser.</li>
+          <li>Ikon aplikasi akan otomatis muncul di Home Screen!</li>
+        </ol>
+      </div>
+
+      <!-- iOS Safari -->
+      <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+        <h6 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+          <i class="fa-brands fa-apple"></i> iPhone / iPad (Safari)
+        </h6>
+        <ol class="text-[11px] text-slate-300 list-decimal list-inside space-y-1">
+          <li>Tekan tombol <strong>Share / Bagikan</strong> di bawah Safari.</li>
+          <li>Pilih <strong>"Add to Home Screen" (Tambah ke Layar Utama)</strong>.</li>
+          <li>Tekan <strong>Add (Tambah)</strong> di pojok kanan atas.</li>
+        </ol>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950" onclick="triggerPwaInstallDirect()">
+          Install Sekarang
+        </button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white" onclick="closePwaModal()">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile Drawer Navigation
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      if (menu) {
+        menu.classList.toggle('hidden');
+      }
+    }
+
+    // PWA Prompt Handler
+    let deferredPwaPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+
+      if (!localStorage.getItem('pwa_banner_dismissed')) {
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.classList.remove('hidden');
+      }
+    });
+
+    function triggerPwaInstall() {
+      if (deferredPwaPrompt) {
+        deferredPwaPrompt.prompt();
+        deferredPwaPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the PWA install prompt');
+          }
+          deferredPwaPrompt = null;
+        });
+      } else {
+        openPwaModal();
+      }
+    }
+
+    function triggerPwaInstallDirect() {
+      if (deferredPwaPrompt) {
+        triggerPwaInstall();
+      } else {
+        alert('Fitur PWA didukung otomatis di Google Chrome & Edge. Jika menu pop-up tidak muncul, gunakan menu browser (titik 3) -> "Install App / Tambahkan ke Layar Utama".');
+      }
+    }
+
+    function openPwaModal() {
+      const modal = document.getElementById('pwaInstallModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closePwaModal() {
+      const modal = document.getElementById('pwaInstallModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function dismissPwaBanner() {
+      const banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.classList.add('hidden');
+      localStorage.setItem('pwa_banner_dismissed', '1');
+    }
+  </script>
+
+</body>
+</html>
