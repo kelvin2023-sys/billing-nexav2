@@ -2,6 +2,7 @@
  * Service: Logika Billing & Tagihan
  */
 const db = require('../config/database');
+const { toSqlDateTime } = require('../utils/sqlDateTime');
 const auditTrail = require('./auditTrailService');
 const { getCurrentDateInTimezone } = require('../config/settingsManager');
 
@@ -710,7 +711,15 @@ function updatePaymentInfo(invoiceId, data) {
       payment_payload = ?,
       payment_expires_at = ?
     WHERE id = ?
-  `).run(gateway, order_id, link, reference, payload ? JSON.stringify(payload) : null, expires_at, invoiceId);
+  `).run(
+    gateway,
+    order_id,
+    link,
+    reference,
+    payload ? JSON.stringify(payload) : null,
+    toSqlDateTime(expires_at),
+    invoiceId
+  );
 }
 
 module.exports = {

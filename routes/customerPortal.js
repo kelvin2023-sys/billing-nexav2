@@ -22,6 +22,7 @@ const Jimp = _jimpMod.Jimp || _jimpMod;
 const qrisUtil = require('../utils/qrisUtil');
 const whatsappService = require('../services/whatsappService');
 const uniqueCodeService = require('../services/uniqueCodeService');
+const { toSqlDateTime } = require('../utils/sqlDateTime');
 const { BinaryBitmap, HybridBinarizer, RGBLuminanceSource, MultiFormatReader, BarcodeFormat, DecodeHintType } = require('@zxing/library');
 let loginRateLimiter = (req, res, next) => next();
 try {
@@ -1277,7 +1278,7 @@ router.post('/public/voucher/create-payment', async (req, res) => {
         '',
         '',
         null,
-        qrisDefaultExpiresAtIso(),
+        toSqlDateTime(qrisDefaultExpiresAtIso()),
         uniqueCode,
         amountUnique,
         orderId
@@ -1371,7 +1372,7 @@ router.post('/public/voucher/create-payment', async (req, res) => {
       result.link || '',
       result.reference || '',
       result.payload ? JSON.stringify(result.payload) : null,
-      resolvePaymentExpiresAt(gateway, result) || gatewayDefaultExpiresAtIso(gateway),
+      toSqlDateTime(resolvePaymentExpiresAt(gateway, result) || gatewayDefaultExpiresAtIso(gateway)),
       orderId
     );
 
