@@ -98,7 +98,7 @@
           <form action="/admin/backup/upload-restore" method="POST" enctype="multipart/form-data" onsubmit="return confirm('PERINGATAN: Memulihkan file backup akan menimpa data/pengaturan aplikasi saat ini. Sistem akan membuat backup otomatis sebelum restore. Lanjutkan?')">
             <div class="fg">
               <label class="fl">Pilih File Backup (.db / .json)</label>
-              <input type="file" class="fc" name="backupFile" accept=".db,.sqlite,.json" required style="padding: 6px 10px;">
+              <input type="file" class="fc" name="backupFile" accept=".sql,.json" required style="padding: 6px 10px;">
               <small class="text-muted" style="font-size: 10px; display: block; margin-top: 4px;">File .db (database) atau .json (settings)</small>
             </div>
             <button type="submit" class="btn btn-s w-100">

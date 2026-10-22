@@ -189,21 +189,22 @@ function getDiskUsage() {
 function getDatabaseMetrics() {
   try {
     const db = require('../config/database');
-    const { resolveDatabasePath } = require('../config/databasePath');
-    const dbPath = resolveDatabasePath();
-    let statsSize = 0;
-    try {
-      const stats = fs.statSync(dbPath);
-      statsSize = stats.size;
-    } catch {}
-    
-    // Get table counts
-    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+    const databaseName = String(process.env.DB_NAME || '');
+    const tables = db.prepare(`
+      SELECT TABLE_NAME AS name,
+             (DATA_LENGTH + INDEX_LENGTH) AS size_bytes
+      FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'
+      ORDER BY TABLE_NAME
+    `).all(databaseName);
     const tableCounts = {};
+    let statsSize = 0;
     
     for (const table of tables) {
+      statsSize += Number(table.size_bytes || 0);
       try {
-        const count = db.prepare(`SELECT COUNT(*) as count FROM ${table.name}`).get();
+        const safeTableName = String(table.name).replace(/`/g, '``');
+        const count = db.prepare(`SELECT COUNT(*) as count FROM \`${safeTableName}\``).get();
         tableCounts[table.name] = count.count;
       } catch (e) {
         tableCounts[table.name] = 'N/A';
@@ -212,7 +213,7 @@ function getDatabaseMetrics() {
     
     return {
       size: formatBytes(statsSize),
-      path: dbPath,
+      path: `${process.env.DB_HOST || '127.0.0.1'}:${process.env.DB_PORT || '3306'}/${databaseName}`,
       tables: tableCounts,
       totalTables: tables.length,
       timestamp: new Date().toISOString()

@@ -1,6 +1,6 @@
 /**
  * Service RADIUS Server (Authentication & Accounting UDP Service)
- * Menggunakan SQLite database billing.db & modul radiusPacket
+ * Menggunakan database MySQL NexaID dan modul radiusPacket.
  */
 const dgram = require('dgram');
 const db = require('../config/database');
@@ -43,7 +43,7 @@ function getNasSecret(nasIp) {
 }
 
 /**
- * Mencari data pelanggan / pengguna dari SQLite DB
+ * Mencari data pelanggan atau pengguna dari MySQL.
  */
 function findUserCredentials(username) {
   const cleanUsername = String(username || '').trim();

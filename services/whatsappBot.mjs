@@ -57,7 +57,7 @@ const msgRetryCounterCache = new BaileysCacheStore(600000);
 const userDevicesCache = new BaileysCacheStore(3600000);
 const placeholderResendCache = new BaileysCacheStore(600000);
 
-// Multi-Layer Message Store (Memory LRU + SQLite Fallback) untuk menangani permintaan retry dari WhatsApp
+// Memory LRU message store untuk menangani permintaan retry dari WhatsApp.
 class MultiLayerMessageStore {
   constructor(maxSize = 5000) {
     this.store = new Map();

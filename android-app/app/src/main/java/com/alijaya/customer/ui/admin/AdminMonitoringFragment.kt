@@ -194,7 +194,7 @@ class AdminMonitoringFragment : Fragment() {
 
             servicesLayout.addView(createServiceRow(ctx, "MikroTik Gateway", mikrotikStatus))
             servicesLayout.addView(createServiceRow(ctx, "WhatsApp Bot Daemon", whatsappStatus))
-            servicesLayout.addView(createServiceRow(ctx, "Database SQLite/Engine", databaseStatus))
+            servicesLayout.addView(createServiceRow(ctx, "Database MySQL", databaseStatus))
 
             servicesCard.addView(servicesLayout)
             container.addView(servicesCard)

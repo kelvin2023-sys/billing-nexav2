@@ -7,27 +7,25 @@ const { logger } = require('../config/logger');
 
 // Inisialisasi tabel audit_trail
 function initAuditTrailTable() {
-  if (String(process.env.DB_DRIVER || 'sqlite').toLowerCase() === 'mysql') return;
   try {
     db.exec(`
       CREATE TABLE IF NOT EXISTS audit_trail (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        action TEXT NOT NULL,
-        entity_type TEXT NOT NULL,
-        entity_id TEXT,
-        actor_type TEXT NOT NULL,
-        actor_id TEXT,
-        actor_name TEXT,
-        details TEXT,
-        ip_address TEXT,
-        user_agent TEXT,
-        created_at DATETIME DEFAULT (NOW_LOCAL())
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_trail(actor_type, actor_id);
-      CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_trail(entity_type, entity_id);
-      CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_trail(action);
-      CREATE INDEX IF NOT EXISTS idx_audit_created_at ON audit_trail(created_at);
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        action VARCHAR(100) NOT NULL,
+        entity_type VARCHAR(100) NOT NULL,
+        entity_id VARCHAR(191) NULL,
+        actor_type VARCHAR(100) NOT NULL,
+        actor_id VARCHAR(191) NULL,
+        actor_name VARCHAR(191) NULL,
+        details LONGTEXT NULL,
+        ip_address VARCHAR(64) NULL,
+        user_agent TEXT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_audit_actor (actor_type, actor_id),
+        INDEX idx_audit_entity (entity_type, entity_id),
+        INDEX idx_audit_action (action),
+        INDEX idx_audit_created_at (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
   } catch (e) {
     logger.error(`[Audit Trail] Gagal inisialisasi tabel: ${e.message}`);

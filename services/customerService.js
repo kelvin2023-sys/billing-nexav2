@@ -760,7 +760,7 @@ async function topupCustomerBalance(customerId, amount, note = '', actorName = '
   const before = Number(customer.balance || 0);
   const after = Math.max(0, before + delta);
 
-  // Execute in SQLite transaction
+  // Execute in a MySQL transaction.
   db.transaction(() => {
     db.prepare('UPDATE customers SET balance = ? WHERE id = ?').run(after, cid);
 

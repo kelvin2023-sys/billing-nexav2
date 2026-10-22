@@ -4,14 +4,26 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { logger } = require('../config/logger');
 const { getSetting, getCurrentDateInTimezone, getNowLocalISO } = require('../config/settingsManager');
-const { resolveDatabasePath } = require('../config/databasePath');
 
 const projectRoot = path.join(__dirname, '..');
 const backupDir = path.join(projectRoot, 'backups');
-const dbPath = resolveDatabasePath();
 const settingsPath = path.join(projectRoot, 'settings.json');
+
+function mysqlCliConfig() {
+  const required = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
+  const missing = required.filter((key) => !String(process.env[key] || '').trim());
+  if (missing.length) throw new Error(`Konfigurasi MySQL belum lengkap: ${missing.join(', ')}`);
+  return {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    env: { ...process.env, MYSQL_PWD: process.env.DB_PASSWORD }
+  };
+}
 
 // Pastikan direktori backup ada
 if (!fs.existsSync(backupDir)) {
@@ -34,16 +46,22 @@ function getBackupTimestamp() {
 }
 
 /**
- * Backup database SQLite
+ * Backup database MySQL menggunakan mysqldump.
  */
 function backupDatabase() {
   try {
     const timestamp = getBackupTimestamp();
-    const backupFileName = `billing_db_${timestamp}.db`;
+    const backupFileName = `billing_mysql_${timestamp}.sql`;
     const backupFilePath = path.join(backupDir, backupFileName);
-
-    // Copy database file
-    fs.copyFileSync(dbPath, backupFilePath);
+    const cfg = mysqlCliConfig();
+    const result = spawnSync('mysqldump', [
+      '--host', cfg.host, '--port', cfg.port, '--user', cfg.user,
+      '--single-transaction', '--routines', '--triggers', '--events',
+      '--no-tablespaces', '--default-character-set=utf8mb4', cfg.database
+    ], { env: cfg.env, encoding: 'buffer', maxBuffer: 1024 * 1024 * 512 });
+    if (result.error) throw new Error(`mysqldump tidak tersedia: ${result.error.message}`);
+    if (result.status !== 0) throw new Error(String(result.stderr || 'mysqldump gagal').trim());
+    fs.writeFileSync(backupFilePath, result.stdout);
 
     // Compress backup (optional - bisa ditambahkan nanti)
     const stats = fs.statSync(backupFilePath);
@@ -106,6 +124,9 @@ function backupAll() {
   const settingsResult = backupSettings();
 
   return {
+    success: dbResult.success && settingsResult.success,
+    fileName: [dbResult.fileName, settingsResult.fileName].filter(Boolean).join(', '),
+    error: [dbResult.error, settingsResult.error].filter(Boolean).join('; ') || null,
     database: dbResult,
     settings: settingsResult,
     timestamp: getNowLocalISO()
@@ -133,10 +154,19 @@ function restoreDatabase(backupFileName) {
       logger.warn('[Backup] Failed to create pre-restore backup');
     }
 
-    // Restore database
-    fs.copyFileSync(backupFilePath, dbPath);
+    if (!backupFileName.endsWith('.sql')) {
+      return { success: false, error: 'Restore database hanya menerima backup MySQL berformat .sql' };
+    }
+    const cfg = mysqlCliConfig();
+    const sql = fs.readFileSync(backupFilePath);
+    const result = spawnSync('mysql', [
+      '--host', cfg.host, '--port', cfg.port, '--user', cfg.user,
+      '--default-character-set=utf8mb4', cfg.database
+    ], { env: cfg.env, input: sql, encoding: 'buffer', maxBuffer: 1024 * 1024 * 512 });
+    if (result.error) throw new Error(`mysql client tidak tersedia: ${result.error.message}`);
+    if (result.status !== 0) throw new Error(String(result.stderr || 'restore MySQL gagal').trim());
 
-    const stats = fs.statSync(dbPath);
+    const stats = fs.statSync(backupFilePath);
     const sizeKB = Math.round(stats.size / 1024);
 
     logger.info(`[Backup] Database restored from: ${backupFileName} (${sizeKB} KB)`);
@@ -218,9 +248,9 @@ function listBackups() {
       let backupDate = null;
       let backupType = null;
       
-      if (file.startsWith('billing_db_') && file.endsWith('.db')) {
+      if (file.startsWith('billing_mysql_') && file.endsWith('.sql')) {
         backupType = 'database';
-        const timestamp = file.replace('billing_db_', '').replace('.db', '');
+        const timestamp = file.replace('billing_mysql_', '').replace('.sql', '');
         backupDate = parseBackupTimestamp(timestamp);
       } else if (file.startsWith('settings_') && file.endsWith('.json')) {
         backupType = 'settings';
@@ -329,7 +359,7 @@ function checkBackupCapacity(maxSizeMB = 500) {
     }
 
     const totalSize = result.backups.reduce((sum, backup) => sum + backup.size, 0);
-    const totalSizeMB = totalSize / (1024 * 1024);
+    let totalSizeMB = totalSize / (1024 * 1024);
 
     if (totalSizeMB > maxSizeMB) {
       logger.warn(`[Backup] Backup size (${totalSizeMB.toFixed(2)} MB) exceeds limit (${maxSizeMB} MB)`);

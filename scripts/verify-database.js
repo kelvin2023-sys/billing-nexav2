@@ -1,83 +1,56 @@
-/**
- * Script untuk memverifikasi dan memperbaiki struktur database
- * Menambahkan kolom yang hilang jika diperlukan
- */
-const Database = require('better-sqlite3');
-const path = require('path');
+/** Read-only MySQL health and schema verification. */
+require('dotenv').config();
 
-const { resolveDatabasePath } = require('../config/databasePath');
-const dbPath = resolveDatabasePath();
-console.log('Memeriksa database:', dbPath);
+const db = require('../config/database');
 
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-
-// Fungsi untuk cek apakah kolom ada
-function columnExists(tableName, columnName) {
-  const columns = db.prepare(`PRAGMA table_info(${tableName})`).all();
-  return columns.some(col => col.name === columnName);
-}
-
-// Daftar kolom yang harus ada di tabel customers
-const requiredColumns = [
-  { name: 'hotspot_username', type: 'TEXT DEFAULT \'\'', description: 'Username Hotspot' },
-  { name: 'hotspot_password', type: 'TEXT DEFAULT \'\'', description: 'Password Hotspot' },
-  { name: 'hotspot_profile', type: 'TEXT DEFAULT \'\'', description: 'Profile Hotspot' },
-  { name: 'mac_address', type: 'TEXT', description: 'MAC Address' },
-  { name: 'connection_type', type: 'TEXT DEFAULT \'pppoe\'', description: 'Tipe Koneksi' },
-  { name: 'static_ip', type: 'TEXT', description: 'Static IP' },
-  { name: 'auto_isolate', type: 'INTEGER DEFAULT 1', description: 'Auto Isolir' },
-  { name: 'isolate_day', type: 'INTEGER DEFAULT 10', description: 'Hari Isolir' },
-  { name: 'email', type: 'TEXT DEFAULT \'\'', description: 'Email' },
-  { name: 'router_id', type: 'INTEGER REFERENCES routers(id) ON DELETE SET NULL', description: 'Router ID' },
-  { name: 'olt_id', type: 'INTEGER REFERENCES olts(id) ON DELETE SET NULL', description: 'OLT ID' },
-  { name: 'pon_port', type: 'TEXT DEFAULT \'\'', description: 'PON Port' },
-  { name: 'odp_id', type: 'INTEGER REFERENCES odps(id) ON DELETE SET NULL', description: 'ODP ID' },
-  { name: 'lat', type: 'TEXT', description: 'Latitude' },
-  { name: 'lng', type: 'TEXT', description: 'Longitude' },
-  { name: 'cable_path', type: 'TEXT', description: 'Cable Path' },
-  { name: 'promo_cycles_used', type: 'INTEGER DEFAULT 0', description: 'Promo Cycles Used' }
+const requiredTables = [
+  'app_settings', 'customers', 'packages', 'invoices', 'routers',
+  'olts', 'odps', 'audit_trail', 'public_voucher_orders'
 ];
 
-console.log('\n=== VERIFIKASI TABEL CUSTOMERS ===\n');
+const requiredColumns = {
+  customers: ['id', 'name', 'router_id', 'auto_isolate', 'promo_cycles_used'],
+  invoices: ['id', 'customer_id', 'amount', 'status'],
+  routers: ['id', 'name', 'host', 'is_active'],
+  public_voucher_orders: ['id', 'payment_method']
+};
 
-let missingColumns = [];
-let existingColumns = [];
+try {
+  const databaseName = String(process.env.DB_NAME || '').trim();
+  if (!databaseName) throw new Error('DB_NAME wajib diisi');
 
-for (const col of requiredColumns) {
-  const exists = columnExists('customers', col.name);
-  if (exists) {
-    existingColumns.push(col.name);
-    console.log(`✓ Kolom '${col.name}' sudah ada`);
-  } else {
-    missingColumns.push(col);
-    console.log(`✗ Kolom '${col.name}' TIDAK ADA`);
-  }
-}
+  const ping = db.prepare('SELECT 1 AS ok').get();
+  if (Number(ping?.ok) !== 1) throw new Error('MySQL tidak merespons health check');
 
-console.log(`\n=== RINGKASAN ===`);
-console.log(`Total kolom yang diperiksa: ${requiredColumns.length}`);
-console.log(`Kolom yang sudah ada: ${existingColumns.length}`);
-console.log(`Kolom yang hilang: ${missingColumns.length}`);
+  const tables = new Set(db.prepare(`
+    SELECT TABLE_NAME AS name
+    FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'
+  `).all(databaseName).map((row) => row.name));
 
-if (missingColumns.length > 0) {
-  console.log(`\n=== MENAMBAHKAN KOLOM YANG HILANG ===\n`);
-
-  for (const col of missingColumns) {
-    try {
-      const sql = `ALTER TABLE customers ADD COLUMN ${col.name} ${col.type}`;
-      console.log(`Menambahkan: ${col.name} (${col.description})`);
-      db.exec(sql);
-      console.log(`✓ Berhasil menambahkan kolom '${col.name}'`);
-    } catch (e) {
-      console.error(`✗ Gagal menambahkan kolom '${col.name}':`, e.message);
+  const missingTables = requiredTables.filter((name) => !tables.has(name));
+  const missingColumns = [];
+  for (const [table, columns] of Object.entries(requiredColumns)) {
+    const existing = new Set(db.prepare(`
+      SELECT COLUMN_NAME AS name
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+    `).all(databaseName, table).map((row) => row.name));
+    for (const column of columns) {
+      if (!existing.has(column)) missingColumns.push(`${table}.${column}`);
     }
   }
 
-  console.log(`\n=== SELESAI ===`);
-  console.log(`Silakan restart aplikasi untuk menerapkan perubahan.`);
-} else {
-  console.log(`\n✓ Semua kolom sudah lengkap!`);
+  if (missingTables.length || missingColumns.length) {
+    if (missingTables.length) console.error(`Tabel hilang: ${missingTables.join(', ')}`);
+    if (missingColumns.length) console.error(`Kolom hilang: ${missingColumns.join(', ')}`);
+    process.exitCode = 1;
+  } else {
+    console.log(`MySQL sehat: ${databaseName}, ${tables.size} tabel terdeteksi.`);
+  }
+} catch (error) {
+  console.error(`Verifikasi MySQL gagal: ${error.message}`);
+  process.exitCode = 1;
+} finally {
+  if (db?.open) db.close();
 }
-
-db.close();

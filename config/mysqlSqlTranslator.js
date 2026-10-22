@@ -32,10 +32,6 @@ function translateSql(input) {
     sql = sql.replace(/\(\s*key\s*,/gi, '(`key`,');
   }
 
-  sql = sql.replace(
-    /SELECT\s+name\s+FROM\s+sqlite_master\s+WHERE\s+type\s*=\s*['"]table['"]/gi,
-    'SELECT TABLE_NAME AS name FROM information_schema.tables WHERE table_schema = DATABASE()',
-  );
   sql = sql.replace(/notes\s*\|\|\s*(['"]\\n['"])\s*\|\|\s*\?/gi, 'CONCAT(notes, $1, ?)');
   sql = sql.replace(
     /^PRAGMA\s+table_info\s*\(\s*([A-Za-z0-9_]+)\s*\)$/i,

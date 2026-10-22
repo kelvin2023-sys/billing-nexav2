@@ -4386,8 +4386,8 @@ router.post('/backup/upload-restore', requireAdminSession, upload.single('backup
     let result;
     let savedFileName = '';
 
-    if (ext === '.db' || ext === '.sqlite' || originalName.includes('billing_db')) {
-      savedFileName = `uploaded_db_${timestamp}_${originalName}`;
+    if (ext === '.sql' || originalName.includes('billing_mysql')) {
+      savedFileName = `uploaded_mysql_${timestamp}_${originalName}`;
       const savePath = path.join(backupDir, savedFileName);
       fs.writeFileSync(savePath, file.buffer);
       result = backupSvc.restoreDatabase(savedFileName);
@@ -4406,7 +4406,7 @@ router.post('/backup/upload-restore', requireAdminSession, upload.single('backup
 
       result = backupSvc.restoreSettings(savedFileName);
     } else {
-      throw new Error('Format file tidak didukung. Harap upload file .db (database) atau .json (settings).');
+      throw new Error('Format file tidak didukung. Harap upload file .sql (database MySQL) atau .json (settings).');
     }
 
     if (result && result.success) {

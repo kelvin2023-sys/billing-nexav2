@@ -222,7 +222,7 @@ class AdminBackupFragment : Fragment() {
 
         // List of Backup Cards
         for (backup in backupList) {
-            val name = backup.optString("name", "backup.sqlite")
+            val name = backup.optString("name", "backup.sql")
             val sizeRaw = backup.opt("size")
             val sizeFormatted = formatFileSize(sizeRaw)
             val date = backup.optString("date", "-")

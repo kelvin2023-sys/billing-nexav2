@@ -5,7 +5,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const { createMysqlDatabase } = require('../config/mysqlDatabase');
 
-test('MySQL adapter supports better-sqlite3 style run/get/all and transactions', () => {
+test('MySQL adapter supports synchronous run/get/all and transactions', () => {
   const db = createMysqlDatabase();
   const table = '__nexaid_adapter_test';
 

@@ -74,7 +74,7 @@ function builtinRowToDevice(row) {
   return device;
 }
 
-/** Parse GenieACS-style query filter for SQLite */
+/** Parse a GenieACS-style query filter for the built-in ACS store. */
 function matchesQuery(device, query) {
   if (!query || Object.keys(query).length === 0) return true;
   for (const [key, condition] of Object.entries(query)) {
@@ -134,7 +134,7 @@ function matchesQuery(device, query) {
 }
 
 /**
- * Create a proxy object that mimics axios interface but operates on local SQLite.
+ * Create a proxy object that mimics axios and operates on the MySQL-backed ACS store.
  * This is the core of the adapter pattern - all downstream code using
  * createAxiosInstance() will transparently use local DB when builtin ACS is active.
  */
@@ -375,7 +375,7 @@ function getACSServer(serverId) {
 
 // Helper: Create axios instance for specific server
 function createAxiosInstance(server) {
-    // Built-in ACS: return proxy object that mimics axios but uses SQLite
+    // Built-in ACS: return proxy object backed by MySQL.
     if (server && (server.id === 'builtin' || server.url === 'local')) {
         return createBuiltinAxiosProxy();
     }

@@ -35,7 +35,7 @@ function cleanupExpiredPendingOrders() {
   const nowTimestamp = formatLocalTimestamp(new Date());
   const twoHoursAgo = new Date(Date.now() - VOUCHER_ORDER_EXPIRY_MS);
   const twoHoursAgoLocal = formatLocalTimestamp(twoHoursAgo);
-  const requiresNonEmptyDate = String(process.env.DB_DRIVER || 'sqlite').toLowerCase() === 'mysql'
+  const requiresNonEmptyDate = String(process.env.DB_DRIVER || 'mysql').toLowerCase() === 'mysql'
     ? ''
     : "AND payment_expires_at != ''";
 

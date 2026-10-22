@@ -808,12 +808,12 @@ router.get('/voucher', async (req, res) => {
 
   /**
    * Ambil voucher profiles — LANGSUNG dari database lokal (voucher_batches).
-   * Tidak perlu koneksi ke MikroTik. Instan < 1ms karena SQLite lokal.
+   * Tidak perlu koneksi langsung ke MikroTik karena data paket tersimpan di MySQL.
    * Profile dengan nama 'default' difilter otomatis.
    */
   const getVoucherProfiles = async () => {
     try {
-      // ── SUMBER UTAMA: voucher_packages di SQLite lokal ──────────────────
+      // ── SUMBER UTAMA: voucher_packages di MySQL ─────────────────────────
       const activePackages = db.prepare(`
         SELECT router_id, profile_name, price, validity
         FROM voucher_packages
@@ -837,7 +837,7 @@ router.get('/voucher', async (req, res) => {
         }
       }
 
-      // ── FALLBACK 1: voucher_batches di SQLite lokal ──────────────────
+      // ── FALLBACK 1: voucher_batches di MySQL ────────────────────────────
       // Ambil profile unik dengan harga terbaru (id MAX per profile_name)
       // Filter: price > 0 dan bukan nama 'default'
       const dbRows = db.prepare(`
@@ -2160,7 +2160,7 @@ router.post('/change-tag', async (req, res) => {
     resolvedPhone = newTag;
     notif = dashboardNotif('ID/Tag berhasil diubah.', 'success');
     
-    // UPDATE DATABASE SQLITE IF MATCHING PROFILE FOUND
+    // Update MySQL when a matching profile is found.
     const profileToUpdate = customerSvc.getAllCustomers().find(c => {
       const cleanLogin = oldTag.replace(/\D/g, '');
       const cleanDb = (c.phone || '').replace(/\D/g, '');

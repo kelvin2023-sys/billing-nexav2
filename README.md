@@ -17,14 +17,13 @@
 - RADIUS server, inventaris, tiket dukungan, absensi, payroll, dan laporan keuangan
 - Peta jaringan untuk pelanggan, ODP, dan jalur kabel
 - REST API untuk aplikasi Android pelanggan
-- Dukungan database SQLite dan MySQL
+- Database MySQL untuk instalasi produksi yang konsisten dan terpusat
 
 ## Teknologi
 
 - Node.js 22
 - Express.js
 - EJS dan Bootstrap
-- SQLite melalui `better-sqlite3`
 - MySQL melalui `mysql2`
 - Baileys untuk WhatsApp
 - RouterOS API, SNMP, SSH, dan TR-069/CWMP
@@ -34,7 +33,7 @@
 
 - Node.js `>=22.0.0 <23`
 - npm
-- SQLite atau MySQL
+- MySQL 8 atau MariaDB yang kompatibel
 - Akses ke perangkat dan layanan eksternal sesuai fitur yang akan digunakan
 
 ## Instalasi
@@ -51,14 +50,7 @@ Salin konfigurasi contoh:
 cp settings.example.json settings.json
 ```
 
-Buat file `.env` dan sesuaikan driver database bila diperlukan:
-
-```env
-NODE_ENV=development
-DB_DRIVER=sqlite
-```
-
-Untuk MySQL:
+Buat file `.env` dan isi konfigurasi MySQL:
 
 ```env
 DB_DRIVER=mysql
@@ -93,7 +85,7 @@ Port dan alamat bind server mengikuti konfigurasi di `settings.json`.
 npm test
 ```
 
-Gunakan Node.js 22 agar modul native `better-sqlite3` sesuai dengan versi runtime proyek.
+Gunakan Node.js 22 sesuai batas runtime yang ditentukan di `package.json`.
 
 ## Struktur proyek
 

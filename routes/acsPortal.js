@@ -46,7 +46,7 @@ const axios = {
     }
 };
 
-// Helper for DB queries (using better-sqlite3)
+// Helper for synchronous MySQL adapter queries.
 function getACSServers(id = null) {
     const builtinServer = isBuiltinAcsEnabled() ? {
         id: 'builtin',
