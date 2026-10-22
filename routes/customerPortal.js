@@ -2618,6 +2618,77 @@ router.get('/payment/status/:invoiceId', async (req, res) => {
   }
 });
 
+router.get('/payment/checkout/:invoiceId', async (req, res) => {
+  const loginId = req.session && req.session.phone;
+  const publicToken = String(req.query.t || '').trim();
+
+  if (!loginId && !publicToken) return res.redirect('/customer/login');
+
+  try {
+    const settings = getSettingsWithCache();
+    const inv = billingSvc.getInvoiceById(req.params.invoiceId);
+    if (!inv) throw new Error('Tagihan tidak ditemukan');
+    if (inv.status === 'paid') throw new Error('Tagihan ini sudah lunas.');
+
+    let profile = null;
+    if (loginId) {
+      profile = findCustomerProfileByLoginId(loginId);
+      if (!profile || Number(inv.customer_id) !== Number(profile.id)) {
+        throw new Error('Tagihan tidak valid');
+      }
+    } else {
+      const tokenUtil = require('../utils/tokenUtil');
+      const payload = tokenUtil.verifyPublicToken(publicToken, settings.session_secret);
+      if (!payload || String(payload.invoiceId) !== String(inv.id)) {
+        throw new Error('Token tidak valid atau expired');
+      }
+      profile = customerSvc.getCustomerById(inv.customer_id);
+      if (!profile) throw new Error('Pelanggan tidak ditemukan');
+    }
+
+    const gateway = resolveConfiguredGatewayForAmount(settings, inv.amount);
+    if (!gateway) throw new Error('Payment gateway belum dikonfigurasi atau nominal terlalu kecil untuk gateway aktif');
+
+    let paymentChannels = [];
+    if (gateway === 'tripay') {
+      try {
+        paymentChannels = await paymentSvc.getTripayChannels();
+      } catch {
+        paymentChannels = [];
+      }
+    } else if (gateway === 'xendit') {
+      paymentChannels = [
+        { code: 'XENDIT', name: 'Semua Metode Xendit', group: 'Checkout Xendit' },
+        { code: 'QRIS', name: 'QRIS', group: 'QRIS & E-Wallet' },
+        { code: 'BCAVA', name: 'BCA Virtual Account', group: 'Virtual Account' },
+        { code: 'BNIVA', name: 'BNI Virtual Account', group: 'Virtual Account' },
+        { code: 'BRIVA', name: 'BRI Virtual Account', group: 'Virtual Account' },
+        { code: 'MANDIRIVA', name: 'Mandiri Virtual Account', group: 'Virtual Account' },
+        { code: 'PERMATAVA', name: 'Permata Virtual Account', group: 'Virtual Account' }
+      ];
+    } else if (gateway === 'midtrans') {
+      paymentChannels = [{ code: 'SNAP', name: 'Semua Metode Midtrans', group: 'Checkout Midtrans' }];
+    } else if (gateway === 'duitku') {
+      paymentChannels = [{ code: 'DUITKU', name: 'Semua Metode Duitku', group: 'Checkout Duitku' }];
+    } else if (gateway === 'qris_static') {
+      paymentChannels = [{ code: 'QRIS_STATIC', name: 'QRIS', group: 'QRIS Statis' }];
+    }
+
+    return res.render('payment_checkout', {
+      settings,
+      invoice: inv,
+      customer: profile,
+      gateway,
+      paymentChannels,
+      publicToken,
+      backUrl: loginId ? '/customer/dashboard#billing-section' : '/isolated'
+    });
+  } catch (error) {
+    logger.error(`[Payment Checkout] ${error && error.message ? error.message : String(error)}`);
+    return res.status(400).send(`Terjadi kesalahan: ${error.message}`);
+  }
+});
+
 router.get('/payment/create/:invoiceId', async (req, res) => {
   const loginId = req.session && req.session.phone;
   const publicToken = req.query.t;

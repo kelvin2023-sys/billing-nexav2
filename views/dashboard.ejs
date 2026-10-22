@@ -1444,17 +1444,8 @@
     let pModal = null;
 
     function openPaymentModal(invId, amount) {
-      currentInvId = invId;
-      let num = 0;
-      if (typeof amount === 'number') {
-        num = isNaN(amount) ? 0 : amount;
-      } else if (amount) {
-        const clean = String(amount).replace(/[^0-9.]/g, '');
-        num = parseFloat(clean) || 0;
-      }
-      document.getElementById('pay_amount_text').innerText = 'Rp ' + Math.round(num).toLocaleString('id-ID');
-      if (!pModal) pModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-      pModal.show();
+      if (!invId) return;
+      window.location.href = `/customer/payment/checkout/${encodeURIComponent(invId)}`;
     }
 
     function submitPayment(method) {
