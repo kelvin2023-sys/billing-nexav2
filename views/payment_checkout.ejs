@@ -32,18 +32,19 @@
       <h1 class="hello">Hai, <%= (customer && customer.name) || invoice.customer_name || 'Pelanggan' %> 👋</h1>
       <div class="invoice-title">Bayar Invoice #<%= String(invoice.invoice_number || invoice.id).padStart(6,'0') %> — <span class="money">Rp <%= Number(invoice.amount || 0).toLocaleString('id-ID') %></span></div>
 
-      <button class="gateway" id="gatewayCard" type="button" aria-expanded="false">
+      <% const isXenditCheckout = gateway === 'xendit'; %>
+      <button class="gateway<%= isXenditCheckout ? ' selected' : '' %>" id="gatewayCard" type="button" aria-expanded="<%= isXenditCheckout ? 'true' : 'false' %>">
         <div class="gateway-icon"><i class="bi bi-shield-check"></i></div>
-        <div><div class="gateway-name"><%= gateway === 'xendit' ? 'Xendit Indonesia' : gateway.toUpperCase() %></div><div class="gateway-sub">Pilih metode pembayaran yang tersedia</div></div>
-        <i class="bi bi-chevron-right arrow"></i>
+        <div><div class="gateway-name"><%= gateway === 'xendit' ? 'Xendit Indonesia' : gateway.toUpperCase() %></div><div class="gateway-sub"><%= isXenditCheckout ? 'QRIS, Virtual Account, E-Wallet & metode lainnya' : 'Pilih metode pembayaran yang tersedia' %></div></div>
+        <i class="bi <%= isXenditCheckout ? 'bi-check-circle-fill' : 'bi-chevron-right' %> arrow"></i>
       </button>
 
-      <div class="methods" id="methods">
+      <div class="methods<%= isXenditCheckout ? '' : '' %>" id="methods"<%= isXenditCheckout ? ' hidden' : '' %>>
         <% paymentChannels.forEach((channel, index) => { %>
           <button type="button" class="method" data-method="<%= channel.code %>"><strong><%= channel.name %></strong><span><%= channel.group || 'Pembayaran Online' %></span></button>
         <% }) %>
       </div>
-      <button class="pay" id="payButton" type="button" disabled>PAY NOW</button>
+      <button class="pay" id="payButton" type="button"<%= isXenditCheckout ? '' : ' disabled' %>><%= isXenditCheckout ? 'BAYAR SEKARANG' : 'PILIH METODE PEMBAYARAN' %></button>
       <a class="back" href="<%= backUrl %>"><i class="bi bi-arrow-left"></i> Kembali ke tagihan</a>
     </section>
 
@@ -61,8 +62,10 @@
     const gatewayCard = document.getElementById('gatewayCard');
     const methods = document.getElementById('methods');
     const payButton = document.getElementById('payButton');
-    let selectedMethod = '';
+    const isXenditCheckout = <%= isXenditCheckout ? 'true' : 'false' %>;
+    let selectedMethod = isXenditCheckout ? 'XENDIT' : '';
     gatewayCard.addEventListener('click', () => {
+      if (isXenditCheckout) return;
       const open = methods.classList.toggle('show');
       gatewayCard.classList.toggle('selected', open);
       gatewayCard.setAttribute('aria-expanded', String(open));

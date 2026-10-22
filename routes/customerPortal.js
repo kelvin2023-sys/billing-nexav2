@@ -2658,13 +2658,7 @@ router.get('/payment/checkout/:invoiceId', async (req, res) => {
       }
     } else if (gateway === 'xendit') {
       paymentChannels = [
-        { code: 'XENDIT', name: 'Semua Metode Xendit', group: 'Checkout Xendit' },
-        { code: 'QRIS', name: 'QRIS', group: 'QRIS & E-Wallet' },
-        { code: 'BCAVA', name: 'BCA Virtual Account', group: 'Virtual Account' },
-        { code: 'BNIVA', name: 'BNI Virtual Account', group: 'Virtual Account' },
-        { code: 'BRIVA', name: 'BRI Virtual Account', group: 'Virtual Account' },
-        { code: 'MANDIRIVA', name: 'Mandiri Virtual Account', group: 'Virtual Account' },
-        { code: 'PERMATAVA', name: 'Permata Virtual Account', group: 'Virtual Account' }
+        { code: 'XENDIT', name: 'Xendit Indonesia', group: 'QRIS, Virtual Account, E-Wallet & lainnya' }
       ];
     } else if (gateway === 'midtrans') {
       paymentChannels = [{ code: 'SNAP', name: 'Semua Metode Midtrans', group: 'Checkout Midtrans' }];
