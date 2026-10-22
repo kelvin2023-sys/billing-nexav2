@@ -2376,9 +2376,13 @@ router.post('/public/payment/create/:invoiceId', async (req, res) => {
     if (!force && inv.payment_link && inv.payment_gateway === gateway) {
       let expiresAtMs = inv.payment_expires_at ? new Date(inv.payment_expires_at).getTime() : 0;
       let payloadExpiresAt = null;
+      let canReusePaymentLink = gateway !== 'xendit';
       if (inv.payment_payload) {
         try {
           const parsedPayload = typeof inv.payment_payload === 'string' ? JSON.parse(inv.payment_payload) : inv.payment_payload;
+          if (gateway === 'xendit') {
+            canReusePaymentLink = String(parsedPayload?.locale || '').toLowerCase() === 'id';
+          }
           payloadExpiresAt = resolvePaymentExpiresAt(inv.payment_gateway, { payload: parsedPayload });
           const ms = payloadExpiresAt ? new Date(payloadExpiresAt).getTime() : 0;
           if (Number.isFinite(ms) && ms > 0) expiresAtMs = ms;
@@ -2398,7 +2402,7 @@ router.post('/public/payment/create/:invoiceId', async (req, res) => {
         } catch {}
       }
 
-      if (Number.isFinite(expiresAtMs) && expiresAtMs > Date.now()) {
+      if (canReusePaymentLink && Number.isFinite(expiresAtMs) && expiresAtMs > Date.now()) {
         logger.info(`[Payment] Reusing existing link for INV-${inv.id} (public)`);
         return res.redirect(inv.payment_link);
       }

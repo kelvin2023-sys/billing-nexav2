@@ -277,6 +277,7 @@ async function createXenditTransaction(invoice, customer, method = 'xendit', app
     success_redirect_url: `${finalAppUrl}${returnPath}`,
     failure_redirect_url: `${finalAppUrl}${returnPath}`,
     currency: 'IDR',
+    locale: 'id',
     items: [{
       name: itemName,
       quantity: 1,
