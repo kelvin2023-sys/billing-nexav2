@@ -31,6 +31,7 @@ const SENSITIVE_FIELDS = [
   'midtrans_server_key',
   'telegram_bot_token',
   'xendit_api_key',
+  'xendit_callback_token',
   'duitku_api_key',
   'session_secret'
 ];

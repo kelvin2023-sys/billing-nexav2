@@ -628,8 +628,12 @@
                 <label class="fl">Xendit Secret API Key</label>
                 <input class="fc" name="xendit_api_key" value="<%= settings.xendit_api_key || '' %>" type="password" placeholder="xnd_development_...">
               </div>
+              <div class="fg">
+                <label class="fl">Xendit Webhook Verification Token</label>
+                <input class="fc" name="xendit_callback_token" value="<%= settings.xendit_callback_token || '' %>" type="password" autocomplete="new-password" placeholder="Token dari Dashboard Xendit">
+              </div>
             </div>
-            <div style="font-size: 10px; color: var(--muted); margin-top: 4px;">Xendit menggunakan callback token yang disetting di dashboard Xendit.</div>
+            <div style="font-size: 10px; color: var(--muted); margin-top: 4px;">Salin Webhook Verification Token dari Dashboard Xendit → Settings → Developers → Webhooks. Token ini digunakan untuk memvalidasi header <code>X-Callback-Token</code>.</div>
           </div>
 
           <!-- Duitku Section -->

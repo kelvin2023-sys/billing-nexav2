@@ -216,6 +216,11 @@ const VALIDATION_RULES = {
     minLength: 10,
     description: 'Xendit API key'
   },
+  xendit_callback_token: {
+    type: 'string',
+    minLength: 10,
+    description: 'Xendit webhook verification token'
+  },
 
   // Duitku Configuration
   duitku_enabled: {
