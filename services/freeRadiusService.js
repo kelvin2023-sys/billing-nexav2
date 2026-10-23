@@ -67,6 +67,10 @@ function listNas() {
 }
 
 function mirrorNas(nas) {
+  if (String(nas.secret || '').length > 60) {
+    nas.secret = generateSecret();
+    db.prepare('UPDATE radius_nas SET secret = ?, updated_at = NOW_LOCAL() WHERE id = ?').run(nas.secret, nas.id);
+  }
   db.prepare('DELETE FROM nas WHERE nasname = ?').run(nas.nasname);
   if (!Number(nas.is_active)) return;
   db.prepare(`
@@ -83,7 +87,8 @@ function mirrorNasById(id) {
 }
 
 function generateSecret() {
-  return crypto.randomBytes(32).toString('hex');
+  // FreeRADIUS' standard MySQL schema commonly limits nas.secret to 60 chars.
+  return crypto.randomBytes(24).toString('hex');
 }
 
 function speedToRadius(value) {
