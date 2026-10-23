@@ -307,6 +307,18 @@ function restrictToAdmin(req, res, next) {
 
 function company() { return getSetting('company_header', 'ISP Admin'); }
 
+const DEFAULT_WHATSAPP_TEST_TEMPLATE =
+  `🧪 *TEST NOTIFIKASI WHATSAPP*\n\n` +
+  `✅ Notifikasi WhatsApp dari *{{company}}* telah terhubung dan berfungsi dengan baik.\n` +
+  `📅 Waktu pengujian: {{waktu}}`;
+
+function renderWhatsappTestTemplate(template, variables = {}) {
+  return String(template || DEFAULT_WHATSAPP_TEST_TEMPLATE).replace(
+    /\{\{\s*(company|waktu)\s*\}\}/gi,
+    (_match, key) => String(variables[String(key).toLowerCase()] || '')
+  );
+}
+
 function flashMsg(req) {
   const m = req.session._msg;
   delete req.session._msg;
@@ -5965,7 +5977,8 @@ router.get('/whatsapp/templates', requireAdminSession, requireSidebarMenuAccess(
     whatsapp_auto_billing_message: db.getAppSetting('whatsapp_auto_billing_message', defaultAutoBilling),
     whatsapp_billing_qris_message: db.getAppSetting('whatsapp_billing_qris_message', defaultQris),
     whatsapp_payment_success_message: db.getAppSetting('whatsapp_payment_success_message', defaultSuccess),
-    whatsapp_isolir_message: db.getAppSetting('whatsapp_isolir_message', defaultIsolir)
+    whatsapp_isolir_message: db.getAppSetting('whatsapp_isolir_message', defaultIsolir),
+    whatsapp_test_notification_message: db.getAppSetting('whatsapp_test_notification_message', DEFAULT_WHATSAPP_TEST_TEMPLATE)
   };
 
   res.render('admin/whatsapp_templates', {
@@ -5983,13 +5996,15 @@ router.post('/whatsapp/templates', requireAdminSession, express.urlencoded({ ext
       whatsapp_auto_billing_message,
       whatsapp_billing_qris_message,
       whatsapp_payment_success_message,
-      whatsapp_isolir_message
+      whatsapp_isolir_message,
+      whatsapp_test_notification_message
     } = req.body;
 
     db.saveAppSetting('whatsapp_auto_billing_message', whatsapp_auto_billing_message || '');
     db.saveAppSetting('whatsapp_billing_qris_message', whatsapp_billing_qris_message || '');
     db.saveAppSetting('whatsapp_payment_success_message', whatsapp_payment_success_message || '');
     db.saveAppSetting('whatsapp_isolir_message', whatsapp_isolir_message || '');
+    db.saveAppSetting('whatsapp_test_notification_message', whatsapp_test_notification_message || DEFAULT_WHATSAPP_TEST_TEMPLATE);
 
     req.session._msg = { type: 'success', text: 'Template WhatsApp berhasil disimpan ke database.' };
   } catch (e) {
@@ -6285,10 +6300,11 @@ router.post('/whatsapp/test-notification', requireAdminSession, async (req, res)
     }
 
     logger.info(`[WA Test] Mengirim test notifikasi ke nomor admin: ${adminPhone}`);
-    const msg =
-      `🧪 *TEST NOTIFIKASI WHATSAPP*\n\n` +
-      `✅ Jika pesan ini masuk, berarti notifikasi WhatsApp dari Billing System sudah berfungsi dengan baik.\n` +
-      `📅 Waktu: ${getNowLocal()}`;
+    const template = db.getAppSetting('whatsapp_test_notification_message', DEFAULT_WHATSAPP_TEST_TEMPLATE);
+    const msg = renderWhatsappTestTemplate(template, {
+      company: company(),
+      waktu: getNowLocal()
+    });
     const ok = await waSvc.sendWhatsAppMessage(adminPhone, msg);
     if (!ok) throw new Error('Gagal mengirim pesan test WhatsApp.');
     logger.info(`[WA Test] Test notifikasi sukses terkirim ke ${adminPhone}`);
