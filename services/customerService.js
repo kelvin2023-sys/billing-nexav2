@@ -2,6 +2,7 @@
  * Service: CRUD Pelanggan & Paket
  */
 const db = require('../config/database');
+const { normalizeOptionalDate } = require('../utils/optionalDate');
 const { logger } = require('../config/logger');
 const { getCurrentDateInTimezone, getSetting } = require('../config/settingsManager');
 
@@ -165,7 +166,7 @@ function getCustomerById(id) {
 }
 
 function createCustomer(data) {
-  let expiredAt = data.expired_at || null;
+  let expiredAt = normalizeOptionalDate(data.expired_at) || null;
   if (!expiredAt && data.package_id) {
     const pkg = db.prepare('SELECT billing_type, duration_days FROM packages WHERE id=?').get(data.package_id);
     if (pkg && pkg.billing_type === 'prepaid') {
@@ -214,7 +215,9 @@ function updateCustomer(id, data) {
   const newPkgId = data.package_id ? parseInt(data.package_id, 10) : null;
   const pkgChanged = prev && Number(prev.package_id || 0) !== Number(newPkgId || 0);
 
-  let expiredAt = data.expired_at !== undefined ? data.expired_at : (prev ? prev.expired_at : null);
+  let expiredAt = data.expired_at !== undefined
+    ? normalizeOptionalDate(data.expired_at)
+    : (prev ? normalizeOptionalDate(prev.expired_at) : null);
   if (!expiredAt && newPkgId) {
     const pkg = db.prepare('SELECT billing_type, duration_days FROM packages WHERE id=?').get(newPkgId);
     if (pkg && pkg.billing_type === 'prepaid') {
