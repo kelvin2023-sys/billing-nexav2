@@ -7495,10 +7495,10 @@ router.post('/radius/nas/add', requireAdminSession, restrictToAdmin, async (req,
     db.prepare(`
       INSERT INTO radius_nas (nasname, shortname, secret, description, is_active)
       VALUES (?, ?, ?, ?, 1)
-      ON CONFLICT(nasname) DO UPDATE SET
-        shortname = excluded.shortname,
-        secret = excluded.secret,
-        description = excluded.description,
+      ON DUPLICATE KEY UPDATE
+        shortname = VALUES(shortname),
+        secret = VALUES(secret),
+        description = VALUES(description),
         is_active = 1
     `).run(
       String(nasname).trim(),
