@@ -312,6 +312,15 @@ const DEFAULT_WHATSAPP_TEST_TEMPLATE =
   `✅ Notifikasi WhatsApp dari *{{company}}* telah terhubung dan berfungsi dengan baik.\n` +
   `📅 Waktu pengujian: {{waktu}}`;
 
+const DEFAULT_WHATSAPP_CONNECTION_TEMPLATE =
+  `🤖 *WHATSAPP BOT AKTIF*\n` +
+  `──────────────────────────────\n` +
+  `🏢 *{{company}}*\n\n` +
+  `✅ QR berhasil dipindai dan bot sudah aktif.\n\n` +
+  `Nomor Bot: {{nomor_bot}}\n` +
+  `Waktu: {{waktu}}\n\n` +
+  `WhatsApp Gateway siap digunakan untuk notifikasi, pengingat tagihan, dan broadcast.`;
+
 function renderWhatsappTestTemplate(template, variables = {}) {
   return String(template || DEFAULT_WHATSAPP_TEST_TEMPLATE).replace(
     /\{\{\s*(company|waktu)\s*\}\}/gi,
@@ -5978,7 +5987,8 @@ router.get('/whatsapp/templates', requireAdminSession, requireSidebarMenuAccess(
     whatsapp_billing_qris_message: db.getAppSetting('whatsapp_billing_qris_message', defaultQris),
     whatsapp_payment_success_message: db.getAppSetting('whatsapp_payment_success_message', defaultSuccess),
     whatsapp_isolir_message: db.getAppSetting('whatsapp_isolir_message', defaultIsolir),
-    whatsapp_test_notification_message: db.getAppSetting('whatsapp_test_notification_message', DEFAULT_WHATSAPP_TEST_TEMPLATE)
+    whatsapp_test_notification_message: db.getAppSetting('whatsapp_test_notification_message', DEFAULT_WHATSAPP_TEST_TEMPLATE),
+    whatsapp_connection_message: db.getAppSetting('whatsapp_connection_message', DEFAULT_WHATSAPP_CONNECTION_TEMPLATE)
   };
 
   res.render('admin/whatsapp_templates', {
@@ -5997,7 +6007,8 @@ router.post('/whatsapp/templates', requireAdminSession, express.urlencoded({ ext
       whatsapp_billing_qris_message,
       whatsapp_payment_success_message,
       whatsapp_isolir_message,
-      whatsapp_test_notification_message
+      whatsapp_test_notification_message,
+      whatsapp_connection_message
     } = req.body;
 
     db.saveAppSetting('whatsapp_auto_billing_message', whatsapp_auto_billing_message || '');
@@ -6005,6 +6016,7 @@ router.post('/whatsapp/templates', requireAdminSession, express.urlencoded({ ext
     db.saveAppSetting('whatsapp_payment_success_message', whatsapp_payment_success_message || '');
     db.saveAppSetting('whatsapp_isolir_message', whatsapp_isolir_message || '');
     db.saveAppSetting('whatsapp_test_notification_message', whatsapp_test_notification_message || DEFAULT_WHATSAPP_TEST_TEMPLATE);
+    db.saveAppSetting('whatsapp_connection_message', whatsapp_connection_message || DEFAULT_WHATSAPP_CONNECTION_TEMPLATE);
 
     req.session._msg = { type: 'success', text: 'Template WhatsApp berhasil disimpan ke database.' };
   } catch (e) {

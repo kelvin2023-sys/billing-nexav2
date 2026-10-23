@@ -90,6 +90,14 @@
                 <i class="bi bi-info-circle"></i> Dipakai oleh tombol <b>Kirim Test Notif</b>. Variabel: <b>{{company}}</b>, <b>{{waktu}}</b>.
               </div>
             </div>
+
+            <div class="fg" style="margin-top: 20px;">
+              <label class="fl">Template Bot Aktif Setelah Scan QR</label>
+              <textarea class="fc" id="tmpl_connection" name="whatsapp_connection_message" rows="9" required style="width: 100%;"><%= templates.whatsapp_connection_message %></textarea>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <i class="bi bi-info-circle"></i> Dikirim satu kali setelah QR berhasil dipindai. Variabel: <b>{{company}}</b>, <b>{{nomor_bot}}</b>, <b>{{waktu}}</b>.
+              </div>
+            </div>
           </div>
         </div>
         <div class="card-bd" style="border-top: 1px solid var(--border); background: var(--bg2); display: flex; flex-wrap:wrap; gap:10px; justify-content: space-between; align-items: center;">

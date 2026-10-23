@@ -314,6 +314,22 @@ function waWrap(title, body) {
   return head + b + foot;
 }
 
+const DEFAULT_CONNECTION_MESSAGE =
+  `🤖 *WHATSAPP BOT AKTIF*\n` +
+  `──────────────────────────────\n` +
+  `🏢 *{{company}}*\n\n` +
+  `✅ QR berhasil dipindai dan bot sudah aktif.\n\n` +
+  `Nomor Bot: {{nomor_bot}}\n` +
+  `Waktu: {{waktu}}\n\n` +
+  `WhatsApp Gateway siap digunakan untuk notifikasi, pengingat tagihan, dan broadcast.`;
+
+function renderConnectionMessage(template, variables = {}) {
+  return String(template || DEFAULT_CONNECTION_MESSAGE).replace(
+    /\{\{\s*(company|nomor_bot|waktu)\s*\}\}/gi,
+    (_match, key) => String(variables[String(key).toLowerCase()] || '')
+  );
+}
+
 function waAutoWrap(text) {
   const { sep } = waBrand();
   const t = String(text || '').trim();
@@ -2730,14 +2746,12 @@ export async function startWhatsAppBot() {
           const toList = loadWhatsappAdminSendList();
           if (toList.length > 0) {
             const wid = sock.user?.id ? String(sock.user.id).split(':')[0] : '-';
-            const body =
-              `✅ QR berhasil dipindai dan bot sudah aktif.\n\n` +
-              `Nomor Bot: ${wid}\n` +
-              `Waktu: ${getNowLocal()}\n\n` +
-              `Silakan gunakan menu Admin untuk fitur billing, notifikasi, dan broadcast.\n\n` +
-              `🙏 Jika aplikasi ini bermanfaat dan Anda ingin mendukung pengembangan, Anda dapat berdonasi secara sukarela ke nomor: 081947215703.\n` +
-              `Terima kasih atas dukungannya.`;
-            const msg = waWrap('🤖 *WHATSAPP BOT AKTIF*', body);
+            const template = db.getAppSetting('whatsapp_connection_message', DEFAULT_CONNECTION_MESSAGE);
+            const msg = renderConnectionMessage(template, {
+              company: getSetting('company_header', 'ISP Admin'),
+              nomor_bot: wid,
+              waktu: getNowLocal()
+            });
             for (const digits of toList) {
               const jid = `${digits}@s.whatsapp.net`;
               sock.sendMessage(jid, { text: msg }).then(res => {
