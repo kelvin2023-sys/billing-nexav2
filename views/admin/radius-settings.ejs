@@ -121,10 +121,10 @@
       <div class="sc p">
         <i class="bi bi-broadcast sc-icon"></i>
         <div class="sc-label" style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-          <span>Status RADIUS Server</span>
+          <span>Status FreeRADIUS</span>
           <form action="/admin/radius/restart" method="POST" style="margin:0;">
-            <button type="submit" class="btn btn-w btn-sm" style="font-size:10px;padding:2px 8px;height:auto;" title="Restart Service UDP RADIUS (1812/1813)">
-              <i class="bi bi-arrow-clockwise"></i> Restart
+            <button type="submit" class="btn btn-w btn-sm" style="font-size:10px;padding:2px 8px;height:auto;" title="Periksa status service FreeRADIUS">
+              <i class="bi bi-arrow-clockwise"></i> Periksa
             </button>
           </form>
         </div>
@@ -135,7 +135,7 @@
             <span class="badge bd"><i class="bi bi-stop-circle-fill"></i> Stopped</span>
           <% } %>
         </div>
-        <div class="sc-sub">UDP Auth: <%= radiusStatus.authPort %> | Acct: <%= radiusStatus.acctPort %></div>
+        <div class="sc-sub">SQL: <%= radiusStatus.sqlReady ? 'Siap' : 'Belum siap' %> · Auth <%= radiusStatus.authPort %> · Acct <%= radiusStatus.acctPort %> · CoA <%= radiusStatus.coaPort %></div>
       </div>
 
       <div class="sc s">
@@ -183,27 +183,24 @@
           
           <!-- Card 1: Core Service Settings -->
           <div class="card mb16">
-            <div class="card-hd">
-              <h6><i class="bi bi-cpu"></i> Layanan RADIUS Server</h6>
+            <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+              <h6 style="margin:0;"><i class="bi bi-cpu"></i> Integrasi FreeRADIUS</h6>
+              <button type="submit" formaction="/admin/radius/sync-users" formmethod="POST" class="btn btn-s btn-sm" onclick="return confirm('Sinkronkan ulang seluruh pelanggan yang memakai RADIUS?')"><i class="bi bi-arrow-repeat"></i> Sinkron Pelanggan</button>
             </div>
             <div class="card-bd">
               <div class="fg">
                 <label class="fl">Status Service RADIUS</label>
                 <select name="radius_enabled" class="fs">
-                  <option value="1" <%= radiusStatus.enabled ? 'selected' : '' %>>Aktif (Running Background UDP Service)</option>
+                  <option value="1" <%= radiusStatus.enabled ? 'selected' : '' %>>Aktif (pelanggan dapat memakai FreeRADIUS)</option>
                   <option value="0" <%= !radiusStatus.enabled ? 'selected' : '' %>>Non-Aktif (Disabled)</option>
                 </select>
                 <small class="text-muted" style="font-size:11px;display:block;margin-top:4px;">
-                  Mendengarkan request autentikasi & accounting dari Router NAS MikroTik.
+                  Tidak menjalankan server UDP Node.js. Service <code>freeradius</code> dikelola oleh systemd pada server Linux.
                 </small>
               </div>
-
-              <div class="fg">
-                <label class="fl">Global Shared Secret RADIUS</label>
-                <input type="text" name="radius_secret" class="fc" value="<%= radiusStatus.secret %>" required>
-                <small class="text-muted" style="font-size:11px;display:block;margin-top:4px;">
-                  Secret default yang digunakan jika IP NAS tidak didaftarkan secara khusus.
-                </small>
+              <div class="alert alert-w" style="margin:0;">
+                Setiap NAS wajib memiliki secret unik. NexaID tidak lagi memakai global shared secret.<br>
+                <strong><%= radiusStatus.radiusUsers %></strong> akun saat ini tersimpan di tabel autentikasi FreeRADIUS.
               </div>
             </div>
           </div>
@@ -274,20 +271,20 @@
               <div class="fg">
                 <label class="fl">Alokasi IP Pool Isolir oleh RADIUS Server</label>
                 <select name="radius_isolir_ip_pool_enabled" class="fs">
-                  <option value="1" <%= (typeof radiusStatus.isolirIpPoolEnabled === 'undefined' || radiusStatus.isolirIpPoolEnabled) ? 'selected' : '' %>>Aktif - RADIUS Alokasikan IP Isolir Khusus Secara Otomatis</option>
+                  <option value="1" <%= (typeof radiusStatus.isolirIpPoolEnabled === 'undefined' || radiusStatus.isolirIpPoolEnabled) ? 'selected' : '' %>>Aktif - Kirim Nama Pool Isolir ke MikroTik</option>
                   <option value="0" <%= (typeof radiusStatus.isolirIpPoolEnabled !== 'undefined' && !radiusStatus.isolirIpPoolEnabled) ? 'selected' : '' %>>Non-Aktif - Hanya Kirim Mikrotik-Group / Framed-Pool</option>
                 </select>
-                <small class="text-muted" style="font-size:11px;display:block;margin-top:4px;">Pelanggan terisolir akan mendapatkan IP khusus dari subnet isolir RADIUS tanpa perlu user/pool di MikroTik.</small>
+                <small class="text-muted" style="font-size:11px;display:block;margin-top:4px;">FreeRADIUS memilih pool, sedangkan alamat IP tetap dialokasikan oleh MikroTik. Script NAS akan membuat pool bila belum ada.</small>
               </div>
 
               <div class="form-row">
                 <div class="fg">
                   <label class="fl">Rentang IP Pool Isolir (Awal)</label>
-                  <input type="text" name="radius_isolir_ip_pool_start" class="fc" value="<%= typeof radiusStatus.isolirIpPoolStart !== 'undefined' ? radiusStatus.isolirIpPoolStart : '10.10.99.2' %>" placeholder="10.10.99.2" required>
+                  <input type="text" name="radius_isolir_ip_pool_start" class="fc" value="<%= typeof radiusStatus.isolirIpPoolStart !== 'undefined' ? radiusStatus.isolirIpPoolStart : '10.250.99.2' %>" placeholder="10.250.99.2" required>
                 </div>
                 <div class="fg">
                   <label class="fl">Rentang IP Pool Isolir (Akhir)</label>
-                  <input type="text" name="radius_isolir_ip_pool_end" class="fc" value="<%= typeof radiusStatus.isolirIpPoolEnd !== 'undefined' ? radiusStatus.isolirIpPoolEnd : '10.10.99.254' %>" placeholder="10.10.99.254" required>
+                  <input type="text" name="radius_isolir_ip_pool_end" class="fc" value="<%= typeof radiusStatus.isolirIpPoolEnd !== 'undefined' ? radiusStatus.isolirIpPoolEnd : '10.250.99.254' %>" placeholder="10.250.99.254" required>
                 </div>
               </div>
 
@@ -325,11 +322,11 @@
               <div class="form-row">
                 <div class="fg">
                   <label class="fl">Rentang IP Pool Normal (Awal)</label>
-                  <input type="text" name="radius_ip_pool_start" class="fc" value="<%= typeof radiusStatus.ipPoolStart !== 'undefined' ? radiusStatus.ipPoolStart : '10.10.10.2' %>" placeholder="10.10.10.2" required>
+                  <input type="text" name="radius_ip_pool_start" class="fc" value="<%= typeof radiusStatus.ipPoolStart !== 'undefined' ? radiusStatus.ipPoolStart : '10.250.10.2' %>" placeholder="10.250.10.2" required>
                 </div>
                 <div class="fg">
                   <label class="fl">Rentang IP Pool Normal (Akhir)</label>
-                  <input type="text" name="radius_ip_pool_end" class="fc" value="<%= typeof radiusStatus.ipPoolEnd !== 'undefined' ? radiusStatus.ipPoolEnd : '10.10.10.254' %>" placeholder="10.10.10.254" required>
+                  <input type="text" name="radius_ip_pool_end" class="fc" value="<%= typeof radiusStatus.ipPoolEnd !== 'undefined' ? radiusStatus.ipPoolEnd : '10.250.10.254' %>" placeholder="10.250.10.254" required>
                 </div>
               </div>
 
@@ -343,48 +340,11 @@
           <!-- Card 5: Panduan Firewall Linux UFW & Script MikroTik -->
           <div class="card mb16">
             <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-              <h6 style="margin:0;"><i class="bi bi-terminal-fill"></i> Script Setup Otomatis MikroTik (RADIUS & Isolir)</h6>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <label style="font-size:12px;margin:0;color:var(--muted);white-space:nowrap;">IP Server Billing:</label>
-                <input type="text" id="billing-ip-input" class="fc" value="<%= typeof serverIp !== 'undefined' ? serverIp : '192.168.8.88' %>" oninput="updateScriptIp(this.value)" style="width:140px;height:30px;font-size:12px;padding:3px 8px;" title="Ubah IP server jika router mengakses lewat IP lain/VPS">
-                <button type="button" class="btn btn-s btn-sm" onclick="copyMikrotikScript()"><i class="bi bi-clipboard-check"></i> Salin Script MikroTik</button>
-              </div>
+              <h6 style="margin:0;"><i class="bi bi-terminal-fill"></i> Script MikroTik per NAS</h6>
             </div>
             <div class="card-bd">
-              <div class="fg" style="margin-bottom:14px;">
-                <label class="fl">1. Perintah Firewall Linux Server (UFW)</label>
-                <small class="text-muted" style="font-size:11px;display:block;margin-bottom:6px;">Jalankan perintah ini di terminal server Linux (VPS / Server Produksi) agar router dapat menghubungi server:</small>
-                <div style="background:var(--bg3);padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-family:monospace;font-size:12px;color:var(--info);">
-                  sudo ufw allow <%= radiusStatus.authPort %>/udp<br>
-                  sudo ufw allow <%= radiusStatus.acctPort %>/udp
-                </div>
-              </div>
-
-              <div class="fg" style="margin-bottom:0;">
-                <label class="fl">2. Script Integrasi RADIUS & Isolir di MikroTik (RouterOS Terminal)</label>
-                <small class="text-muted" style="font-size:11px;display:block;margin-bottom:6px;">Copy dan pastekan seluruh script di bawah ini ke <strong>Terminal MikroTik</strong> (IP server otomatis terisi dari IP di atas):</small>
-                <textarea id="mikrotik-script-area" class="fc" rows="14" style="font-family:monospace;font-size:11px;background:var(--bg3);color:#10b981;line-height:1.4;white-space:pre;" readonly># =========================================================
-# SCRIPT SETUP OTOMATIS RADIUS BILLING & ISOLIR MIKROTIK
-# =========================================================
-
-# 1. Aktifkan Fitur RADIUS pada PPP MikroTik
-/ppp aaa set use-radius=yes accounting=yes interim-update=1m
-
-# 2. Buka Akses Disconnect / CoA RADIUS MikroTik (Port UDP 3799)
-/radius incoming set accept=yes port=3799
-
-# 3. Tambahkan Server RADIUS Billing ke MikroTik
-/radius remove [find comment="RTRW-Billing-RADIUS"]
-/radius add service=ppp address=<%= typeof serverIp !== 'undefined' ? serverIp : '192.168.8.88' %> secret="<%= radiusStatus.secret %>" authentication-port=<%= radiusStatus.authPort %> accounting-port=<%= radiusStatus.acctPort %> timeout=3000ms comment="RTRW-Billing-RADIUS"
-
-# 4. Tambahkan IP Address Gateway Subnet Isolir RADIUS
-/ip address remove [find comment="Gateway-Isolir-RADIUS"]
-:do { /ip address add address=<%= (typeof radiusStatus.isolirIpPoolStart !== 'undefined' ? radiusStatus.isolirIpPoolStart.replace(/\.\d+$/, '.1') : '10.10.99.1') %>/24 interface=([/interface find type=bridge]->0) comment="Gateway-Isolir-RADIUS" } on-error={ /ip address add address=<%= (typeof radiusStatus.isolirIpPoolStart !== 'undefined' ? radiusStatus.isolirIpPoolStart.replace(/\.\d+$/, '.1') : '10.10.99.1') %>/24 interface=([/interface find]->0) comment="Gateway-Isolir-RADIUS" }
-
-# 5. Filter Drop Akses Internet Pelanggan Terisolir RADIUS (Universal)
-/ip firewall filter remove [find comment="Isolir-RADIUS-Block-Internet"]
-/ip firewall filter add chain=forward src-address=<%= (typeof radiusStatus.isolirIpPoolStart !== 'undefined' ? radiusStatus.isolirIpPoolStart.replace(/\.\d+$/, '.0') : '10.10.99.0') %>/24 action=drop comment="Isolir-RADIUS-Block-Internet"</textarea>
-              </div>
+              <p style="margin:0 0 10px;">Tambahkan NAS pada tab <strong>Daftar NAS Router</strong>, kemudian klik <strong>Script</strong>. Script menggunakan IP L2TP NAS dan secret unik milik router tersebut.</p>
+              <div class="alert alert-w" style="margin:0;">Setelah menambah, mengubah, menonaktifkan, atau merotasi secret NAS, jalankan <code>systemctl restart freeradius</code> pada server.</div>
             </div>
           </div>
 
@@ -413,7 +373,7 @@
                   <th>Shared Secret</th>
                   <th>Keterangan</th>
                   <th>Status</th>
-                  <th style="width:140px;text-align:right;">Aksi</th>
+                  <th style="width:230px;text-align:right;">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -422,7 +382,7 @@
                     <tr>
                       <td><strong><%= nas.nasname %></strong></td>
                       <td><%= nas.shortname || '-' %></td>
-                      <td><code><%= nas.secret %></code></td>
+                      <td><code title="Gunakan tombol Script untuk melihat konfigurasi">••••••••••••</code></td>
                       <td><%= nas.description || '-' %></td>
                       <td>
                         <% if (nas.is_active) { %>
@@ -432,6 +392,9 @@
                         <% } %>
                       </td>
                       <td style="text-align:right;white-space:nowrap;">
+                        <button type="button" class="btn btn-s btn-sm" onclick='openNasScript(<%- JSON.stringify(nas) %>)' title="Lihat script MikroTik">
+                          <i class="bi bi-terminal"></i> Script
+                        </button>
                         <!-- Toggle Status -->
                         <form action="/admin/radius/nas/toggle" method="POST" style="display:inline;">
                           <input type="hidden" name="id" value="<%= nas.id %>">
@@ -443,6 +406,10 @@
                         <button type="button" class="btn btn-p btn-sm" onclick='openEditNasModal(<%- JSON.stringify(nas) %>)' title="Edit NAS Client">
                           <i class="bi bi-pencil"></i>
                         </button>
+                        <form action="/admin/radius/nas/rotate-secret" method="POST" onsubmit="return confirm('Rotasi secret NAS <%= nas.nasname %>? Script lama akan berhenti bekerja setelah FreeRADIUS direstart.')" style="display:inline;">
+                          <input type="hidden" name="id" value="<%= nas.id %>">
+                          <button type="submit" class="btn btn-w btn-sm" title="Rotasi shared secret"><i class="bi bi-key"></i></button>
+                        </form>
                         <!-- Hapus NAS -->
                         <form action="/admin/radius/nas/delete" method="POST" onsubmit="return confirm('Hapus NAS <%= nas.nasname %>?')" style="display:inline;">
                           <input type="hidden" name="id" value="<%= nas.id %>">
@@ -454,7 +421,7 @@
                 <% } else { %>
                   <tr>
                     <td colspan="6" class="text-center text-muted" style="padding:24px;">
-                      Belum ada NAS khusus terdaftar. Server akan menggunakan <strong>Global Shared Secret</strong> untuk semua request router.
+                      Belum ada NAS terdaftar. Tambahkan router menggunakan IP L2TP tetap; setiap NAS akan memperoleh secret unik.
                     </td>
                   </tr>
                 <% } %>
@@ -522,6 +489,7 @@
                           <input type="hidden" name="username" value="<%= s.username %>">
                           <input type="hidden" name="session_id" value="<%= s.session_id %>">
                           <input type="hidden" name="nas_ip" value="<%= s.nas_ip %>">
+                           <input type="hidden" name="framed_ip" value="<%= s.framed_ip || '' %>">
                           <button type="submit" class="btn btn-d btn-sm" title="Putuskan Sesi Active RADIUS">
                             <i class="bi bi-power"></i> Putuskan
                           </button>
@@ -631,7 +599,7 @@
         </div>
         <div class="fg">
           <label class="fl">Shared Secret Router</label>
-          <input type="text" name="secret" class="fc" placeholder="Contoh: secret123" required>
+          <input type="text" name="secret" class="fc" placeholder="Kosongkan agar dibuat otomatis (disarankan)">
         </div>
         <div class="fg">
           <label class="fl">Keterangan (Opsional)</label>
@@ -666,7 +634,7 @@
         </div>
         <div class="fg">
           <label class="fl">Shared Secret Router</label>
-          <input type="text" name="secret" id="edit_nas_secret" class="fc" placeholder="Contoh: secret123" required>
+          <input type="password" name="secret" id="edit_nas_secret" class="fc" placeholder="Kosongkan untuk mempertahankan secret saat ini">
         </div>
         <div class="fg">
           <label class="fl">Keterangan (Opsional)</label>
@@ -685,6 +653,28 @@
         <button type="submit" class="btn btn-p"><i class="bi bi-check-lg"></i> Simpan Perubahan</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- MODAL SCRIPT NAS -->
+<div class="mo" id="nasScriptModal">
+  <div class="mb" style="max-width:760px;">
+    <div class="mh">
+      <div class="mt"><i class="bi bi-terminal"></i> Script MikroTik L2TP + FreeRADIUS</div>
+      <button type="button" class="mc" onclick="closeModal('nasScriptModal')">&times;</button>
+    </div>
+    <div class="mbody">
+      <div class="fg">
+        <label class="fl">IP FreeRADIUS yang dapat dijangkau melalui L2TP</label>
+        <input type="text" id="script_server_ip" class="fc" value="<%= typeof serverIp !== 'undefined' ? serverIp : '172.17.12.106' %>" oninput="renderNasScript()">
+      </div>
+      <textarea id="nas_script_area" class="fc" rows="11" readonly style="font-family:monospace;font-size:12px;color:#10b981;background:var(--bg3);"></textarea>
+      <small class="text-muted">Script mengaktifkan PPP RADIUS, accounting satu menit, dan CoA UDP 3799. Jalankan hanya setelah akun demo tersedia di FreeRADIUS.</small>
+    </div>
+    <div class="mf">
+      <button type="button" class="btn btn-g" onclick="closeModal('nasScriptModal')">Tutup</button>
+      <button type="button" class="btn btn-p" onclick="copyNasScript()"><i class="bi bi-clipboard"></i> Salin Script</button>
+    </div>
   </div>
 </div>
 
@@ -715,30 +705,43 @@
     document.getElementById('edit_nas_id').value = nas.id || '';
     document.getElementById('edit_nas_nasname').value = nas.nasname || '';
     document.getElementById('edit_nas_shortname').value = nas.shortname || '';
-    document.getElementById('edit_nas_secret').value = nas.secret || '';
+    document.getElementById('edit_nas_secret').value = '';
     document.getElementById('edit_nas_description').value = nas.description || '';
     document.getElementById('edit_nas_is_active').value = nas.is_active ? '1' : '0';
     showModal('editNasModal');
   }
 
-  function updateScriptIp(newIp) {
-    const el = document.getElementById('mikrotik-script-area');
-    if (!el) return;
-    const cleanIp = String(newIp || '').trim() || '192.168.8.88';
-    el.value = el.value.replace(/address=\S+ secret=/, 'address=' + cleanIp + ' secret=');
+  let selectedNasForScript = null;
+  function openNasScript(nas) {
+    selectedNasForScript = nas;
+    renderNasScript();
+    showModal('nasScriptModal');
+  }
+  function renderNasScript() {
+    if (!selectedNasForScript) return;
+    const serverIp = String(document.getElementById('script_server_ip').value || '').trim();
+    const nasIp = String(selectedNasForScript.nasname || '').trim();
+    const secret = String(selectedNasForScript.secret || '');
+    const normalPool = <%- JSON.stringify(radiusStatus.framedPool || 'pool-pppoe') %>;
+    const normalRange = <%- JSON.stringify((radiusStatus.ipPoolStart || '10.250.10.2') + '-' + (radiusStatus.ipPoolEnd || '10.250.10.254')) %>;
+    const isolirPool = <%- JSON.stringify(radiusStatus.isolirPool || 'isolir') %>;
+    const isolirRange = <%- JSON.stringify((radiusStatus.isolirIpPoolStart || '10.250.99.2') + '-' + (radiusStatus.isolirIpPoolEnd || '10.250.99.254')) %>;
+    document.getElementById('nas_script_area').value =
+      '# NexaID FreeRADIUS - ' + (selectedNasForScript.shortname || nasIp) + '\n' +
+      ':if ([:len [/ip pool find name="' + normalPool + '"]] = 0) do={ /ip pool add name="' + normalPool + '" ranges=' + normalRange + ' }\n' +
+      ':if ([:len [/ip pool find name="' + isolirPool + '"]] = 0) do={ /ip pool add name="' + isolirPool + '" ranges=' + isolirRange + ' }\n' +
+      '/radius remove [find comment="NEXA-FREERADIUS"]\n' +
+      '/radius add service=ppp address=' + serverIp + ' src-address=' + nasIp + ' secret="' + secret + '" authentication-port=1812 accounting-port=1813 timeout=3s require-message-auth=yes comment="NEXA-FREERADIUS"\n' +
+      '/radius incoming set accept=yes port=3799\n' +
+      '/ppp aaa set use-radius=yes accounting=yes interim-update=1m\n';
+  }
+  function copyNasScript() {
+    const el = document.getElementById('nas_script_area');
+    navigator.clipboard.writeText(el.value).then(() => alert('Script MikroTik berhasil disalin.'));
   }
 
-  function copyMikrotikScript() {
-    const el = document.getElementById('mikrotik-script-area');
-    if (!el) return;
-    el.select();
-    navigator.clipboard.writeText(el.value).then(() => {
-      alert('Script setup MikroTik & Isolir RADIUS berhasil disalin! Silakan tempelkan (paste) di Terminal MikroTik Anda.');
-    }).catch(() => {
-      document.execCommand('copy');
-      alert('Script MikroTik berhasil disalin!');
-    });
-  }
+  const requestedTab = new URLSearchParams(window.location.search).get('tab');
+  if (requestedTab) switchTab(requestedTab);
 
   // Auto dismiss notification alert after 4 seconds
   setTimeout(() => {

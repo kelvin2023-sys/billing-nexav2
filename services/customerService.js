@@ -175,7 +175,7 @@ function createCustomer(data) {
     }
   }
 
-  return db.prepare(`
+  const result = db.prepare(`
     INSERT INTO customers (nik, name, phone, email, address, area, package_id, router_id, olt_id, odp_id, pon_port, lat, lng, genieacs_tag, pppoe_username, pppoe_password, pppoe_remote_address, isolir_profile, status, install_date, expired_at, notes, auto_isolate, isolate_day, connection_type, static_ip, mac_address, hotspot_username, hotspot_password, hotspot_profile, collector_id, is_radius)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
@@ -208,10 +208,19 @@ function createCustomer(data) {
     data.collector_id ? parseInt(data.collector_id) : null,
     data.is_radius !== undefined ? parseInt(data.is_radius) : 1
   );
+
+  if (getSetting('radius_backend', 'freeradius') === 'freeradius') {
+    try {
+      require('./freeRadiusService').syncCustomer(Number(result.lastInsertRowid));
+    } catch (error) {
+      logger.error(`[FreeRADIUS] Gagal sinkron pelanggan baru: ${error.message}`);
+    }
+  }
+  return result;
 }
 
 function updateCustomer(id, data) {
-  const prev = db.prepare('SELECT package_id, expired_at, install_date FROM customers WHERE id=?').get(id);
+  const prev = db.prepare('SELECT nik, package_id, expired_at, install_date, pppoe_username FROM customers WHERE id=?').get(id);
   const newPkgId = data.package_id ? parseInt(data.package_id, 10) : null;
   const pkgChanged = prev && Number(prev.package_id || 0) !== Number(newPkgId || 0);
 
@@ -264,6 +273,18 @@ function updateCustomer(id, data) {
 
   if (pkgChanged) {
     db.prepare('UPDATE customers SET promo_cycles_used = 0 WHERE id=?').run(id);
+  }
+
+  if (getSetting('radius_backend', 'freeradius') === 'freeradius') {
+    try {
+      const radiusSvc = require('./freeRadiusService');
+      const newUsername = String(data.pppoe_username || '').trim();
+      const oldUsername = String(prev?.pppoe_username || '').trim();
+      if (oldUsername && oldUsername !== newUsername) radiusSvc.removeUsername(oldUsername);
+      radiusSvc.syncCustomer(id);
+    } catch (error) {
+      logger.error(`[FreeRADIUS] Gagal sinkron perubahan pelanggan ${id}: ${error.message}`);
+    }
   }
 
   return result;
@@ -320,7 +341,15 @@ async function deleteCustomer(id) {
     }
   }
   
-  return db.prepare('DELETE FROM customers WHERE id=?').run(id);
+  const result = db.prepare('DELETE FROM customers WHERE id=?').run(id);
+  if (customer?.pppoe_username && getSetting('radius_backend', 'freeradius') === 'freeradius') {
+    try {
+      require('./freeRadiusService').removeUsername(customer.pppoe_username);
+    } catch (error) {
+      logger.error(`[FreeRADIUS] Gagal menghapus kredensial ${customer.pppoe_username}: ${error.message}`);
+    }
+  }
+  return result;
 }
 
 async function bulkDeleteCustomers(ids) {

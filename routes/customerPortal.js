@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const customerDevice = require('../services/customerDeviceService');
-const { getSettingsWithCache, getNowLocal, getCurrentTimeInfo, getNowLocalISO, formatDateLocal } = require('../config/settingsManager');
+const { getSettingsWithCache, getSetting, getNowLocal, getCurrentTimeInfo, getNowLocalISO, formatDateLocal } = require('../config/settingsManager');
 const billingSvc = require('../services/billingService');
 const pdfSvc = require('../services/pdfInvoiceService');
 const paymentSvc = require('../services/paymentService');
@@ -3944,14 +3944,16 @@ router.post('/customer/reconnect', async (req, res) => {
     if (!customer) throw new Error('Data pelanggan tidak ditemukan');
 
     const username = customer.pppoe_username || customer.hotspot_username || customer.name;
-    const radiusSvc = require('../services/radiusServerService');
     const mikrotikSvc = require('../services/mikrotikService');
 
     let reconnected = false;
     if (username) {
-      await radiusSvc.disconnectSession(username);
-      await mikrotikSvc.kickPppoeUser(username, customer.router_id);
-      await mikrotikSvc.kickHotspotUser(username, customer.router_id);
+      if (Number(customer.is_radius) === 1 && getSetting('radius_backend', 'freeradius') === 'freeradius') {
+        await require('../services/freeRadiusService').disconnectUser(username);
+      } else {
+        await mikrotikSvc.kickPppoeUser(username, customer.router_id);
+        await mikrotikSvc.kickHotspotUser(username, customer.router_id);
+      }
       reconnected = true;
     }
 

@@ -7329,22 +7329,15 @@ router.post('/onu-provision/delete', requireAdminSession, restrictToAdmin, expre
 });
 
 // --- RADIUS SERVER MANAGEMENT ---
-const radiusSvc = require('../services/radiusServerService');
+const radiusSvc = require('../services/freeRadiusService');
 
 router.get('/radius-settings', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
     const radiusStatus = radiusSvc.getStatus();
     const onlineSessions = radiusSvc.getOnlineSessions();
     const acctLogs = radiusSvc.getAccountingLogs(100);
-    const nasList = db.prepare(`SELECT * FROM radius_nas ORDER BY id DESC`).all() || [];
-
-    const todayStats = db.prepare(`
-      SELECT 
-        COUNT(1) as total_events,
-        COALESCE(SUM(input_octets + output_octets), 0) as total_bytes
-      FROM radius_accounting
-      WHERE DATE(created_at) = DATE('now')
-    `).get() || { total_events: 0, total_bytes: 0 };
+    const nasList = radiusSvc.listNas();
+    const todayStats = radiusSvc.getTodayStats();
 
     const todayTrafficMB = (todayStats.total_bytes / (1024 * 1024)).toFixed(1);
     const todayEvents = todayStats.total_events;
@@ -7390,7 +7383,6 @@ router.post('/radius-settings', requireAdminSession, restrictToAdmin, async (req
   try {
     const {
       radius_enabled,
-      radius_secret,
       radius_auth_port,
       radius_acct_port,
       radius_isolir_action,
@@ -7409,30 +7401,24 @@ router.post('/radius-settings', requireAdminSession, restrictToAdmin, async (req
 
     saveSettings({
       radius_enabled: radius_enabled === '1' ? '1' : '0',
-      radius_secret: String(radius_secret || 'secret123').trim(),
+      radius_backend: 'freeradius',
       radius_auth_port: String(radius_auth_port || '1812').trim(),
       radius_acct_port: String(radius_acct_port || '1813').trim(),
       radius_isolir_action: String(radius_isolir_action || 'pool').trim(),
       radius_isolir_pool: String(radius_isolir_pool || 'isolir').trim(),
       radius_isolir_rate_limit: String(radius_isolir_rate_limit || '512k/512k').trim(),
       radius_isolir_ip_pool_enabled: radius_isolir_ip_pool_enabled === '1' ? '1' : '0',
-      radius_isolir_ip_pool_start: String(radius_isolir_ip_pool_start || '10.10.99.2').trim(),
-      radius_isolir_ip_pool_end: String(radius_isolir_ip_pool_end || '10.10.99.254').trim(),
+      radius_isolir_ip_pool_start: String(radius_isolir_ip_pool_start || '10.250.99.2').trim(),
+      radius_isolir_ip_pool_end: String(radius_isolir_ip_pool_end || '10.250.99.254').trim(),
       radius_limit_simultaneous: radius_limit_simultaneous === '1' ? '1' : '0',
       radius_default_rate_limit: String(radius_default_rate_limit || '5M/10M').trim(),
       radius_ip_pool_enabled: radius_ip_pool_enabled === '1' ? '1' : '0',
-      radius_ip_pool_start: String(radius_ip_pool_start || '10.10.10.2').trim(),
-      radius_ip_pool_end: String(radius_ip_pool_end || '10.10.10.254').trim(),
+      radius_ip_pool_start: String(radius_ip_pool_start || '10.250.10.2').trim(),
+      radius_ip_pool_end: String(radius_ip_pool_end || '10.250.10.254').trim(),
       radius_framed_pool: String(radius_framed_pool || 'pool-pppoe').trim()
     });
 
-    // Kontrol background service UDP RADIUS
-    radiusSvc.stop();
-    if (radius_enabled === '1') {
-      radiusSvc.start();
-    }
-
-    req.session._msg = { type: 'success', text: 'Pengaturan RADIUS Server berhasil diperbarui.' };
+    req.session._msg = { type: 'success', text: 'Pengaturan integrasi FreeRADIUS berhasil diperbarui.' };
   } catch (error) {
     logger.error('Error saving RADIUS settings:', error);
     req.session._msg = { type: 'danger', text: 'Gagal menyimpan pengaturan: ' + error.message };
@@ -7442,10 +7428,10 @@ router.post('/radius-settings', requireAdminSession, restrictToAdmin, async (req
 
 router.post('/radius/disconnect', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
-    const { username, session_id, nas_ip } = req.body;
+    const { username, session_id, nas_ip, framed_ip } = req.body;
     if (!username) throw new Error('Username tidak boleh kosong');
 
-    await radiusSvc.disconnectSession(username, session_id, nas_ip);
+    await radiusSvc.disconnectSession(username, session_id, nas_ip, framed_ip);
     req.session._msg = { type: 'success', text: `Sesi aktif RADIUS untuk user "${username}" berhasil diputus.` };
   } catch (e) {
     logger.error('Error disconnecting RADIUS session:', e);
@@ -7457,9 +7443,11 @@ router.post('/radius/disconnect', requireAdminSession, restrictToAdmin, async (r
 router.post('/radius/clear-stale', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
     const result = db.prepare(`
-      UPDATE radius_accounting
-      SET status_type = 2, terminate_cause = 10, updated_at = NOW_LOCAL()
-      WHERE status_type IN (1, 3) AND updated_at < datetime('now', '-2 hours')
+      UPDATE radacct
+      SET acctstoptime = COALESCE(acctstoptime, NOW_LOCAL()),
+          acctterminatecause = COALESCE(acctterminatecause, 'Admin-Reset')
+      WHERE acctstoptime IS NULL
+        AND COALESCE(acctupdatetime, acctstarttime) < DATE_SUB(NOW_LOCAL(), INTERVAL 2 HOUR)
     `).run();
     req.session._msg = { type: 'success', text: `Berhasil membersihkan ${result.changes} sesi kadaluarsa / ghost.` };
   } catch (e) {
@@ -7471,10 +7459,9 @@ router.post('/radius/clear-stale', requireAdminSession, restrictToAdmin, async (
 
 router.post('/radius/restart', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
-    radiusSvc.stop();
-    await new Promise(r => setTimeout(r, 500));
-    radiusSvc.start();
-    req.session._msg = { type: 'success', text: 'Layanan RADIUS Server (UDP Port 1812/1813) berhasil direstart.' };
+    const status = radiusSvc.getStatus();
+    if (!status.running) throw new Error('Service freeradius tidak aktif. Jalankan systemctl restart freeradius pada server.');
+    req.session._msg = { type: 'success', text: 'FreeRADIUS aktif dan koneksi tabel SQL siap diperiksa.' };
   } catch (e) {
     logger.error('Error restarting RADIUS service:', e);
     req.session._msg = { type: 'danger', text: 'Gagal merestart layanan RADIUS: ' + e.message };
@@ -7482,11 +7469,27 @@ router.post('/radius/restart', requireAdminSession, restrictToAdmin, async (req,
   res.redirect('/admin/radius-settings');
 });
 
+router.post('/radius/sync-users', requireAdminSession, restrictToAdmin, async (req, res) => {
+  try {
+    const result = radiusSvc.syncAllCustomers();
+    const suffix = result.errors.length ? ` (${result.errors.length} gagal; periksa log aplikasi)` : '';
+    req.session._msg = {
+      type: result.errors.length ? 'warning' : 'success',
+      text: `${result.synced} dari ${result.total} pelanggan RADIUS berhasil disinkronkan ke FreeRADIUS${suffix}.`
+    };
+  } catch (error) {
+    logger.error('Error syncing FreeRADIUS users:', error);
+    req.session._msg = { type: 'danger', text: 'Gagal sinkron pelanggan RADIUS: ' + error.message };
+  }
+  res.redirect('/admin/radius-settings?tab=settings');
+});
+
 router.post('/radius/nas/add', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
-    const { nasname, shortname, secret, description } = req.body;
-    if (!nasname || !secret) {
-      throw new Error('IP NAS & Shared Secret wajib diisi.');
+    const { nasname, shortname, description } = req.body;
+    const secret = String(req.body.secret || '').trim() || radiusSvc.generateSecret();
+    if (!nasname) {
+      throw new Error('IP NAS wajib diisi.');
     }
 
     db.prepare(`
@@ -7504,7 +7507,9 @@ router.post('/radius/nas/add', requireAdminSession, restrictToAdmin, async (req,
       String(description || '').trim()
     );
 
-    req.session._msg = { type: 'success', text: `NAS ${nasname} berhasil ditambahkan.` };
+    const savedNas = db.prepare('SELECT * FROM radius_nas WHERE nasname = ?').get(String(nasname).trim());
+    radiusSvc.mirrorNas(savedNas);
+    req.session._msg = { type: 'success', text: `NAS ${nasname} berhasil ditambahkan. Restart FreeRADIUS agar NAS baru dimuat.` };
   } catch (error) {
     logger.error('Error adding NAS:', error);
     req.session._msg = { type: 'danger', text: 'Gagal menambah NAS: ' + error.message };
@@ -7514,10 +7519,15 @@ router.post('/radius/nas/add', requireAdminSession, restrictToAdmin, async (req,
 
 router.post('/radius/nas/edit', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
-    const { id, nasname, shortname, secret, description, is_active } = req.body;
-    if (!id || !nasname || !secret) {
-      throw new Error('ID, IP NAS & Shared Secret wajib diisi.');
+    const { id, nasname, shortname, description, is_active } = req.body;
+    if (!id || !nasname) {
+      throw new Error('ID dan IP NAS wajib diisi.');
     }
+
+    const currentNas = db.prepare('SELECT * FROM radius_nas WHERE id = ?').get(id);
+    if (!currentNas) throw new Error('NAS tidak ditemukan.');
+    const secret = String(req.body.secret || '').trim() || currentNas.secret;
+    const oldNasname = currentNas.nasname;
 
     db.prepare(`
       UPDATE radius_nas
@@ -7532,7 +7542,10 @@ router.post('/radius/nas/edit', requireAdminSession, restrictToAdmin, async (req
       id
     );
 
-    req.session._msg = { type: 'success', text: `Data NAS ${nasname} berhasil diperbarui.` };
+    if (oldNasname !== String(nasname).trim()) db.prepare('DELETE FROM nas WHERE nasname = ?').run(oldNasname);
+    radiusSvc.mirrorNasById(id);
+
+    req.session._msg = { type: 'success', text: `Data NAS ${nasname} berhasil diperbarui. Restart FreeRADIUS agar perubahan dimuat.` };
   } catch (error) {
     logger.error('Error updating NAS:', error);
     req.session._msg = { type: 'danger', text: 'Gagal memperbarui NAS: ' + error.message };
@@ -7547,7 +7560,8 @@ router.post('/radius/nas/toggle', requireAdminSession, restrictToAdmin, async (r
     if (nas) {
       const newStatus = nas.is_active ? 0 : 1;
       db.prepare(`UPDATE radius_nas SET is_active = ?, updated_at = (NOW_LOCAL()) WHERE id = ?`).run(newStatus, id);
-      req.session._msg = { type: 'success', text: `Status NAS ${nas.nasname} diubah menjadi ${newStatus ? 'Aktif' : 'Non-Aktif'}.` };
+      radiusSvc.mirrorNasById(id);
+      req.session._msg = { type: 'success', text: `Status NAS ${nas.nasname} diubah menjadi ${newStatus ? 'Aktif' : 'Non-Aktif'}. Restart FreeRADIUS agar perubahan dimuat.` };
     }
   } catch (error) {
     logger.error('Error toggling NAS status:', error);
@@ -7559,13 +7573,32 @@ router.post('/radius/nas/toggle', requireAdminSession, restrictToAdmin, async (r
 router.post('/radius/nas/delete', requireAdminSession, restrictToAdmin, async (req, res) => {
   try {
     const { id } = req.body;
+    const nas = db.prepare('SELECT nasname FROM radius_nas WHERE id = ?').get(id);
+    if (nas) db.prepare('DELETE FROM nas WHERE nasname = ?').run(nas.nasname);
     db.prepare(`DELETE FROM radius_nas WHERE id = ?`).run(id);
-    req.session._msg = { type: 'success', text: 'NAS Client berhasil dihapus.' };
+    req.session._msg = { type: 'success', text: 'NAS Client berhasil dihapus. Restart FreeRADIUS agar client dilepas.' };
   } catch (error) {
     logger.error('Error deleting NAS:', error);
     req.session._msg = { type: 'danger', text: 'Gagal menghapus NAS: ' + error.message };
   }
   res.redirect('/admin/radius-settings');
+});
+
+router.post('/radius/nas/rotate-secret', requireAdminSession, restrictToAdmin, async (req, res) => {
+  try {
+    const { id } = req.body;
+    const secret = radiusSvc.generateSecret();
+    const result = db.prepare(`
+      UPDATE radius_nas SET secret = ?, updated_at = NOW_LOCAL() WHERE id = ?
+    `).run(secret, id);
+    if (!result.changes) throw new Error('NAS tidak ditemukan.');
+    const nas = radiusSvc.mirrorNasById(id);
+    req.session._msg = { type: 'success', text: `Secret NAS ${nas.nasname} berhasil dirotasi. Salin ulang script dan restart FreeRADIUS.` };
+  } catch (error) {
+    logger.error('Error rotating NAS secret:', error);
+    req.session._msg = { type: 'danger', text: 'Gagal merotasi secret NAS: ' + error.message };
+  }
+  res.redirect('/admin/radius-settings?tab=nas');
 });
 
 module.exports = router;

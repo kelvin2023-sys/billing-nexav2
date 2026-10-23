@@ -2131,7 +2131,7 @@ if (runtimeFlags.backupEnabled) {
 
 // Inisialisasi RADIUS Server jika diaktifkan di settings
 const radiusSvc = require('./services/radiusServerService');
-if (getSetting('radius_enabled', '0') === '1') {
+if (getSetting('radius_enabled', '0') === '1' && getSetting('radius_backend', 'freeradius') === 'internal') {
   radiusSvc.start();
 }
 

@@ -279,6 +279,7 @@ function ensureDefaultSettings() {
     const defaultSettings = {
       // RADIUS Server settings (ditambahkan untuk update dari GitHub)
       radius_enabled: '0',
+      radius_backend: 'freeradius',
       radius_secret: 'secret123',
       radius_auth_port: '1812',
       radius_acct_port: '1813',
@@ -288,11 +289,11 @@ function ensureDefaultSettings() {
       radius_default_rate_limit: '5M/10M',
       radius_isolir_rate_limit: '512k/512k',
       radius_isolir_ip_pool_enabled: '1',
-      radius_isolir_ip_pool_start: '10.10.99.2',
-      radius_isolir_ip_pool_end: '10.10.99.254',
+      radius_isolir_ip_pool_start: '10.250.99.2',
+      radius_isolir_ip_pool_end: '10.250.99.254',
       radius_ip_pool_enabled: '1',
-      radius_ip_pool_start: '10.10.10.2',
-      radius_ip_pool_end: '10.10.10.254',
+      radius_ip_pool_start: '10.250.10.2',
+      radius_ip_pool_end: '10.250.10.254',
       radius_framed_pool: 'pool-pppoe',
       radius_send_group: '0'
     };
